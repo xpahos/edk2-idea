@@ -1,0 +1,174 @@
+{
+  parserClass="org.tianocore.edk2idea.Inf.InfParser"
+
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="Inf"
+  psiImplClassSuffix="Impl"
+  psiPackage="org.tianocore.edk2idea.Inf.psi"
+  psiImplPackage="org.tianocore.edk2idea.Inf.psi.impl"
+
+  elementTypeHolderClass="org.tianocore.edk2idea.Inf.InfTypes"
+  elementTypeClass="org.tianocore.edk2idea.Inf.psi.InfElementType"
+  tokenTypeClass="org.tianocore.edk2idea.Inf.psi.InfTokenType"
+  tokens=[
+    STAR
+    MINUS
+    EQUALS
+    PIPE
+    DEPEX_AND
+    DEPEX_OR
+    DEPEX_NOT
+    DEPEX_BEFORE
+    DEPEX_AFTER
+    DEPEX_SOR
+    DEPEX_PUSH
+    DEPEX_END
+  ]
+}
+
+// Root rule - EDK II INF file structure
+infFile ::= headerSection? definesSection (otherSections | emptyLineOrComment)*
+
+// Header section (optional)
+private headerSection ::= emptyLineOrComment*
+emptyLineOrComment ::= COMMENT? CRLF
+
+// Defines section (required)
+definesSection ::= DEFINES_SECTION_HEADER COMMENT? CRLF (defineStatement | emptyLineOrComment)*
+defineStatement ::= defineEntry COMMENT? CRLF
+private defineRecovery ::= !(defineEntry | sectionHeader | COMMENT | IDENTIFIER | CRLF)
+
+defineEntry ::=
+    ( INF_VERSION EQUALS ( HEX_NUMBER | VERSION_NUMBER )
+    | BASE_NAME EQUALS ( BASE_NAME_STRING | IDENTIFIER )
+    | FILE_GUID EQUALS GUID
+    | MODULE_TYPE EQUALS MODULE_TYPE_VALUE
+    | UEFI_SPECIFICATION_VERSION EQUALS HEX_NUMBER
+    | PI_SPECIFICATION_VERSION EQUALS HEX_NUMBER
+    | LIBRARY_CLASS EQUALS definesLibraryClassValue*
+    | BUILD_NUMBER EQUALS HEX_NUMBER
+    | VERSION_STRING EQUALS VERSION_NUMBER
+    | PCD_IS_DRIVER EQUALS PCD_DRIVER_TYPE
+    | ENTRY_POINT EQUALS IDENTIFIER
+    | UNLOAD_IMAGE EQUALS IDENTIFIER
+    | CONSTRUCTOR EQUALS IDENTIFIER
+    | DESTRUCTOR EQUALS IDENTIFIER
+    | SHADOW EQUALS BOOLEAN_VALUE
+    | PCI_DEVICE_ID EQUALS NUMBER
+    | PCI_VENDOR_ID EQUALS NUMBER
+    | PCI_CLASS_CODE EQUALS NUMBER
+    | PCI_COMPRESS EQUALS BOOLEAN_VALUE
+    | CUSTOM_MAKEFILE EQUALS (COMPILER_TYPE PIPE)? PATH_STRING
+    | DPX_SOURCE EQUALS PATH_STRING
+    | SPEC EQUALS IDENTIFIER EQUALS VERSION_NUMBER
+    | UEFI_HII_RESOURCE_SECTION EQUALS BOOLEAN_VALUE
+    | MODULE_UNI_FILE EQUALS PATH_STRING
+    | DEFINE IDENTIFIER EQUALS IDENTIFIER
+    | EDK_RELEASE_VERSION EQUALS HEX_NUMBER ) { pin=2 recoverWhile=defineRecovery }
+private definesLibraryClassValue ::= IDENTIFIER ( PIPE MODULE_TYPE_VALUE+ )?
+
+// Other sections
+otherSections ::= (
+    definesSection |
+    sourcesSection |
+    packagesSection |
+    libraryClassesSection |
+    protocolsSection |
+    guidsSection |
+    ppisSection |
+    pcdSection |
+    depexSection |
+    binariesSection |
+    buildOptionsSection |
+    userExtensionsSection |
+    unknownSection
+)
+unknownSection ::= UNKNOWN_SECTION_HEADER CRLF
+
+// Sources section
+sourcesSection ::= SOURCES_SECTION_HEADER COMMENT? CRLF (sourceStatement | emptyLineOrComment)*
+sourceStatement ::= sourceEntry COMMENT? CRLF
+sourceEntry ::= (PATH_STRING | BASE_NAME_STRING)+
+
+// Packages section
+packagesSection ::= PACKAGES_SECTION_HEADER CRLF (packageStatement | emptyLineOrComment)*
+packageStatement ::= packageEntry CRLF | COMMENT CRLF
+packageEntry ::= filenameValue (PIPE featureFlagExpression)?
+
+// LibraryClasses section
+libraryClassesSection ::= LIBRARY_CLASSES_SECTION_HEADER CRLF (libraryClassStatement | emptyLineOrComment)*
+libraryClassStatement ::= libraryClassEntry CRLF | macroDefinition CRLF | COMMENT CRLF
+libraryClassEntry ::= identifierValue (PIPE featureFlagExpression)?
+
+// Protocols section
+protocolsSection ::= PROTOCOLS_SECTION_HEADER CRLF (protocolStatement | emptyLineOrComment)*
+protocolStatement ::= protocolEntry CRLF | usageComment CRLF | COMMENT CRLF
+protocolEntry ::= identifierValue (PIPE featureFlagExpression)?
+usageComment ::= USAGE
+
+// GUIDs section
+guidsSection ::= GUIDS_SECTION_HEADER CRLF (guidStatement | emptyLineOrComment)*
+guidStatement ::= guidEntry CRLF | usageComment CRLF | COMMENT CRLF
+guidEntry ::= identifierValue (PIPE featureFlagExpression)?
+
+// PPIs section
+ppisSection ::= PPIS_SECTION_HEADER CRLF (ppiStatement | emptyLineOrComment)*
+ppiStatement ::= ppiEntry CRLF | usageComment CRLF | COMMENT CRLF
+ppiEntry ::= identifierValue (PIPE featureFlagExpression)?
+
+// PCD sections
+pcdSection ::= PCD_SECTION_HEADER CRLF (pcdStatement | emptyLineOrComment)*
+pcdStatement ::= pcdEntry CRLF | usageComment CRLF | COMMENT CRLF
+pcdEntry ::= pcdName (PIPE pcdDefaultValue)? (PIPE featureFlagExpression)?
+pcdName ::= IDENTIFIER DOT IDENTIFIER | BASE_NAME_STRING
+
+// DEPEX section
+depexSection ::= DEPEX_SECTION_HEADER depexExpression?
+depexExpression ::= depexTerm (depexOperator depexTerm)*
+depexTerm ::= identifierValue | BOOLEAN_VALUE | guidValue | LPAREN depexExpression RPAREN | depexUnaryOp depexTerm | depexSpecialOp
+depexOperator ::= DEPEX_AND | DEPEX_OR
+depexUnaryOp ::= DEPEX_NOT
+depexSpecialOp ::= DEPEX_BEFORE identifierValue | DEPEX_AFTER identifierValue | DEPEX_SOR | DEPEX_PUSH guidValue | DEPEX_END
+
+// Binaries section
+binariesSection ::= BINARIES_SECTION_HEADER CRLF (binaryStatement | emptyLineOrComment)*
+binaryStatement ::= binaryEntry CRLF | COMMENT CRLF
+binaryEntry ::= BINARY_TYPE PIPE filenameValue binaryOptions?
+binaryOptions ::= (PIPE (IDENTIFIER | STAR))? (PIPE (IDENTIFIER | STAR))? (PIPE (tagName | STAR))? (PIPE featureFlagExpression)?
+
+// BuildOptions section
+buildOptionsSection ::= BUILD_OPTIONS_SECTION_HEADER CRLF (buildOptionStatement | emptyLineOrComment)*
+buildOptionStatement ::= buildOptionEntry CRLF | asBuiltComment CRLF | macroDefinition CRLF | COMMENT CRLF
+buildOptionEntry ::= toolSpec buildOperator buildFlags
+toolSpec ::= IDENTIFIER
+buildOperator ::= EQUALS | DOUBLE_EQUALS
+buildFlags ::= (MINUS | PATH_STRING | IDENTIFIER | STRING | STAR | EQUALS)+
+
+// UserExtensions section
+userExtensionsSection ::= USER_EXTENSIONS_SECTION_HEADER CRLF (userExtensionStatement | emptyLineOrComment)*
+userExtensionStatement ::= userExtensionContent (EQUALS userExtensionContent)? CRLF | COMMENT CRLF
+userExtensionContent ::= filenameValue | identifierValue | STRING
+
+// Common value types
+guidValue ::= GUID
+numberValue ::= NUMBER | HEX_NUMBER
+filenameValue ::= FILENAME | STRING | IDENTIFIER | BASE_NAME_STRING | PATH_STRING
+identifierValue ::= IDENTIFIER
+macroValue ::= identifierValue | filenameValue | STRING
+pcdDefaultValue ::= numberValue | STRING | BOOLEAN_VALUE
+featureFlagExpression ::= BOOLEAN_VALUE | identifierValue
+
+// Tool chain related
+tagName ::= IDENTIFIER
+toolCode ::= IDENTIFIER
+toolTarget ::= BUILD_TARGET | IDENTIFIER
+toolTag ::= tagName
+toolArch ::= ARCH | IDENTIFIER
+toolCommand ::= IDENTIFIER | LBRACKET | RBRACKET
+
+// Section headers
+private sectionHeader ::= DEFINES_SECTION_HEADER | SOURCES_SECTION_HEADER | PACKAGES_SECTION_HEADER
+    | LIBRARY_CLASSES_SECTION_HEADER | PROTOCOLS_SECTION_HEADER | GUIDS_SECTION_HEADER | PPIS_SECTION_HEADER
+    | PCD_SECTION_HEADER | DEPEX_SECTION_HEADER | BINARIES_SECTION_HEADER | BUILD_OPTIONS_SECTION_HEADER
+    | USER_EXTENSIONS_SECTION_HEADER | UNKNOWN_SECTION_HEADER

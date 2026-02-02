@@ -1,0 +1,28 @@
+{
+  parserClass="org.tianocore.edk2idea.Uni.UniParser"
+
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="Uni"
+  psiImplClassSuffix="Impl"
+  psiPackage="org.tianocore.edk2idea.Uni.psi"
+  psiImplPackage="org.tianocore.edk2idea.Uni.psi.impl"
+
+  elementTypeHolderClass="org.tianocore.edk2idea.Uni.psi.UniTypes"
+  elementTypeClass="org.tianocore.edk2idea.Uni.psi.UniElementType"
+  tokenTypeClass="org.tianocore.edk2idea.Uni.psi.UniTokenType"
+}
+
+uniFile ::= (stringEntry | property | COMMENT)*
+
+stringEntry ::= STRING_KEYWORD stringName languageEntry*
+
+stringName ::= WORD
+
+languageEntry ::= LANGUAGE_KEYWORD languageName stringValues
+
+languageName ::= WORD
+
+stringValues ::= STRING_LITERAL+
+
+property ::= WORD

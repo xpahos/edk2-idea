@@ -1,0 +1,14 @@
+[Defines]
+  INF_VERSION                = 0x00010017
+  BASE_NAME                  = UefiPxeBcDxe
+  FILE_GUID                  = B95E9FDA-26DE-48d2-8807-1F9107AC5E3A
+  MODULE_TYPE                = DXE_DRIVER
+  VERSION_STRING             = 1.0
+
+[Binaries.X64]
+  PE32|UefiPxeBcDxe.efi
+  DXE_DEPEX|UefiPxeBcDxe.depex
+  # 日本語 Binary
+
+[Binaries.Ia32]
+  PE32|App32.efi|DEBUG|MSFT

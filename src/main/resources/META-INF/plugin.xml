@@ -1,0 +1,98 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
+    <id>org.tianocore.edk2-idea</id>
+
+    <!-- Public plugin name should be written in Title Case.
+         Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
+    <name>EDK2-idea</name>
+
+    <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
+    <vendor url="https://tianocore.org">tianocore.org</vendor>
+
+    <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
+         Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
+    <description><![CDATA[
+    EDK2 base configs support.<br>
+    Some files are supported, some not.
+  ]]></description>
+
+    <!-- Product and plugin compatibility requirements.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
+    <depends>com.intellij.modules.platform</depends>
+
+    <!-- Extension points defined by the plugin.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
+    <extensions defaultExtensionNs="com.intellij">
+        <fileType
+                name="EDK2 Inf File"
+                implementationClass="org.tianocore.edk2idea.Inf.InfFileType"
+                fieldName="INSTANCE"
+                language="EDK2 Information Module"
+                extensions="inf"/>
+        <fileType
+                name="EDK2 Dsc File"
+                implementationClass="org.tianocore.edk2idea.Dsc.DscFileType"
+                fieldName="INSTANCE"
+                language="EDK2 Description Module"
+                extensions="dsc"/>
+        <fileType
+                name="EDK2 Fdf File"
+                implementationClass="org.tianocore.edk2idea.Fdf.FdfFileType"
+                fieldName="INSTANCE"
+                language="EDK2 Flash Description File"
+                extensions="fdf"/>
+        <fileType
+                name="EDK2 Dec File"
+                implementationClass="org.tianocore.edk2idea.Dec.DecFileType"
+                fieldName="INSTANCE"
+                language="EDK2 Package Declaration File"
+                extensions="dec"/>
+        <fileType
+                name="EDK2 Uni File"
+                implementationClass="org.tianocore.edk2idea.Uni.UniFileType"
+                fieldName="INSTANCE"
+                language="EDK2 Uni"
+                extensions="uni"/>
+        <lang.parserDefinition
+                language="EDK2 Information Module"
+                implementationClass="org.tianocore.edk2idea.Inf.InfParserDefinition"/>
+        <lang.parserDefinition
+                language="EDK2 Description Module"
+                implementationClass="org.tianocore.edk2idea.Dsc.DscParserDefinition"/>
+        <lang.parserDefinition
+                language="EDK2 Flash Description File"
+                implementationClass="org.tianocore.edk2idea.Fdf.FdfParserDefinition"/>
+        <lang.parserDefinition
+                language="EDK2 Package Declaration File"
+                implementationClass="org.tianocore.edk2idea.Dec.DecParserDefinition"/>
+        <lang.parserDefinition
+                language="EDK2 Uni"
+                implementationClass="org.tianocore.edk2idea.Uni.UniParserDefinition"/>
+        <lang.syntaxHighlighterFactory
+                language="EDK2 Information Module"
+                implementationClass="org.tianocore.edk2idea.Inf.InfSyntaxHighlighterFactory"/>
+        <lang.syntaxHighlighterFactory
+                language="EDK2 Description Module"
+                implementationClass="org.tianocore.edk2idea.Dsc.DscSyntaxHighlighterFactory"/>
+        <lang.syntaxHighlighterFactory
+                language="EDK2 Flash Description File"
+                implementationClass="org.tianocore.edk2idea.Fdf.FdfSyntaxHighlighterFactory"/>
+        <lang.syntaxHighlighterFactory
+                language="EDK2 Package Declaration File"
+                implementationClass="org.tianocore.edk2idea.Dec.DecSyntaxHighlighterFactory"/>
+        <lang.syntaxHighlighterFactory
+                language="EDK2 Uni"
+                implementationClass="org.tianocore.edk2idea.Uni.UniSyntaxHighlighterFactory"/>
+        <colorSettingsPage
+                implementation="org.tianocore.edk2idea.Inf.InfColorSettingsPage"/>
+        <colorSettingsPage
+                implementation="org.tianocore.edk2idea.Dsc.DscColorSettingsPage"/>
+        <colorSettingsPage
+                implementation="org.tianocore.edk2idea.Fdf.FdfColorSettingsPage"/>
+        <colorSettingsPage
+                implementation="org.tianocore.edk2idea.Dec.DecColorSettingsPage"/>
+        <colorSettingsPage
+                implementation="org.tianocore.edk2idea.Uni.UniColorSettingsPage"/>
+    </extensions>
+</idea-plugin>

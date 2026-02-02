@@ -1,0 +1,4 @@
+[Defines]
+!include OvmfPkg/Include/Fdf/OvmfPkgDefines.fdf.inc
+# Japanese Comment: テスト
+DEFINE MY_VAR = "文字列"

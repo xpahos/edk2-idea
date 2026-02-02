@@ -1,0 +1,15 @@
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = FirmwarePerformanceDxe
+  FILE_GUID                      = 00160F8D-2B35-4df2-BBE0-B272A8D631F0
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+
+[UserExtensions.TianoCore."ExtraFiles"]
+  FirmwarePerformanceDxeExtra.uni
+  # 日本語 extension
+
+[UserExtensions.TianoCore."ExtraHeader"]
+  "Title" = "Sample"
+  "Hidden" = "True"
+  # テスト

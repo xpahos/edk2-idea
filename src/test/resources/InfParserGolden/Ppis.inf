@@ -1,0 +1,12 @@
+[Defines]
+  INF_VERSION = 1.25
+  BASE_NAME = PpisTest
+  FILE_GUID = 00000000-0000-0000-0000-000000000004
+  MODULE_TYPE = PEIM
+  VERSION_STRING = 1.0
+
+[Ppis]
+  gEfiPeiReadOnlyVariable2PpiGuid
+  
+  # ありがとう
+  gEfiPeiMemoryDiscoveredPpiGuid | FALSE

@@ -1,0 +1,13 @@
+[Defines]
+  INF_VERSION = 1.25
+  BASE_NAME = GuidsTest
+  FILE_GUID = 00000000-0000-0000-0000-000000000003
+  MODULE_TYPE = PEIM
+  VERSION_STRING = 1.0
+
+[Guids]
+  gEfiFileInfoGuid
+  gEfiFileSystemInfoGuid ## PRODUCES
+  
+  # ありがとう
+  gEfiGlobalVariableGuid | TRUE

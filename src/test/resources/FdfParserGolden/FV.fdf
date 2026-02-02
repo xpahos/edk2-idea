@@ -1,0 +1,19 @@
+[FV.PEIFV]
+FvNameGuid         = 6938079B-B503-4E3D-9D24-B28337A25806
+BlockSize          = 0x10000
+FvAlignment        = 16
+ERASE_POLARITY     = 1
+MEMORY_MAPPED      = TRUE
+STICKY_WRITE       = TRUE
+LOCK_CAP           = TRUE
+LOCK_STATUS        = TRUE
+
+APRIORI PEI {
+!if $(DEBUG_TO_MEM)
+  INF  OvmfPkg/MemDebugLogPei/MemDebugLogPei.inf
+!endif
+  INF  MdeModulePkg/Universal/PCD/Pei/Pcd.inf
+}
+
+INF  MdeModulePkg/Core/Pei/PeiMain.inf
+INF  FILE_GUID = $(UP_CPU_PEI_GUID) UefiCpuPkg/CpuMpPei/CpuMpPei.inf

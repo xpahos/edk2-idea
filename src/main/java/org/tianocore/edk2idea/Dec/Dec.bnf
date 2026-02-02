@@ -1,0 +1,108 @@
+{
+  parserClass="org.tianocore.edk2idea.Dec.DecParser"
+
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="Dec"
+  psiImplClassSuffix="Impl"
+  psiPackage="org.tianocore.edk2idea.Dec.psi"
+  psiImplPackage="org.tianocore.edk2idea.Dec.psi.impl"
+
+  elementTypeHolderClass="org.tianocore.edk2idea.Dec.psi.DecTypes"
+  elementTypeClass="org.tianocore.edk2idea.Dec.psi.DecElementType"
+  tokenTypeClass="org.tianocore.edk2idea.Dec.psi.DecTokenType"
+
+  tokens = [
+      LBRACKET="["
+      RBRACKET="]"
+      LPAREN="("
+      RPAREN=")"
+      LBRACE="{"
+      RBRACE="}"
+      DOT="."
+      COMMA=","
+      EQ="="
+      PIPE="|"
+      COMMENT="regexp:#[^\n]*"
+      CRLF="regexp:\n|\r|\r\n"
+      WHITE_SPACE="regexp:[ \t\f]+"
+      
+      HEX_VAL="regexp:0[xX][0-9a-fA-F]+"
+      INT_VAL="regexp:[0-9]+"
+      BOOL_VAL="regexp:(TRUE|FALSE|true|false)"
+      
+      SECTION_NAME="regexp:[a-zA-Z0-9_.]+"
+      WORD="regexp:[^\[\]=\s|{},]+"
+      STRING="regexp:\"[^\"]*\""
+  ]
+}
+
+decFile ::= (decSection | property | emptyLineOrComment)*
+
+decSection ::= (
+    definesSection |
+    includesSection |
+    libraryClassesSection |
+    guidsSection |
+    protocolsSection |
+    ppisSection |
+    pcdsSection |
+    userExtensionsSection |
+    genericSection
+)
+
+property ::= key EQ value {methods=[getKey getValue]}
+
+private emptyLineOrComment ::= CRLF | COMMENT | WHITE_SPACE
+
+// [Defines]
+definesSection ::= LBRACKET "Defines" RBRACKET CRLF* (property | emptyLineOrComment)*
+
+// [Includes]
+includesSection ::= LBRACKET "Includes" sectionModifiers? RBRACKET CRLF* (includePath | emptyLineOrComment)*
+includePath ::= path {methods=[getPath]}
+
+// [LibraryClasses]
+libraryClassesSection ::= LBRACKET "LibraryClasses" sectionModifiers? RBRACKET CRLF* (libraryClassEntry | emptyLineOrComment)*
+libraryClassEntry ::= libraryClassName PIPE libraryPath {methods=[getName getPath]}
+
+// [Guids], [Protocols], [Ppis]
+guidsSection ::= LBRACKET "Guids" sectionModifiers? RBRACKET CRLF* (guidEntry | emptyLineOrComment)*
+protocolsSection ::= LBRACKET "Protocols" sectionModifiers? RBRACKET CRLF* (guidEntry | emptyLineOrComment)*
+ppisSection ::= LBRACKET "Ppis" sectionModifiers? RBRACKET CRLF* (guidEntry | emptyLineOrComment)*
+
+guidEntry ::= guidName EQ guidValue {methods=[getName getValue]}
+
+// [Pcds...]
+pcdsSection ::= LBRACKET pcdSectionType sectionModifiers? RBRACKET CRLF* (pcdEntry | emptyLineOrComment)*
+pcdSectionType ::= "PcdsFixedAtBuild" | "PcdsPatchableInModule" | "PcdsFeatureFlag" | "PcdsDynamic" | "PcdsDynamicEx" | "PcdsDynamicHii" | "PcdsDynamicVpd"
+pcdEntry ::= pcdName PIPE pcdValue PIPE pcdType PIPE pcdToken {methods=[getName getValue getType getToken]}
+
+// [UserExtensions]
+userExtensionsSection ::= LBRACKET "UserExtensions" sectionModifiers? RBRACKET CRLF* (userExtensionContent | emptyLineOrComment)*
+userExtensionContent ::= WORD | STRING | property
+
+// Generic fallback
+genericSection ::= LBRACKET SECTION_NAME RBRACKET CRLF* (genericEntry | emptyLineOrComment)*
+genericEntry ::= (WORD | EQ | PIPE | COMMA | LBRACE | RBRACE | HEX_VAL | INT_VAL | BOOL_VAL)+
+
+// Common elements
+sectionModifiers ::= (DOT SECTION_NAME)+ (COMMA (DOT SECTION_NAME)+)*
+
+key ::= WORD
+value ::= (WORD | STRING | HEX_VAL | INT_VAL | BOOL_VAL)+
+
+libraryClassName ::= WORD
+libraryPath ::= path
+
+guidName ::= WORD
+guidValue ::= LBRACE guidStructure RBRACE
+guidStructure ::= (HEX_VAL COMMA?)+ (LBRACE (HEX_VAL COMMA?)+ RBRACE)?
+
+pcdName ::= WORD
+pcdValue ::= WORD | STRING | HEX_VAL | INT_VAL | BOOL_VAL
+pcdType ::= "BOOLEAN" | "UINT8" | "UINT16" | "UINT32" | "UINT64" | "VOID*"
+pcdToken ::= HEX_VAL
+
+path ::= (WORD | "/") +
+

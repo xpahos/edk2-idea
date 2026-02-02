@@ -1,0 +1,14 @@
+[LibraryClasses]
+  ##  @libraryclass  Provides most usb APIs to support the Hid requests defined in Usb Hid 1.1 spec
+  #                  and the standard requests defined in Usb 1.1 spec.
+  ##
+  UefiUsbLib|Include/Library/UefiUsbLib.h
+
+  ##  @libraryclass  Provides a service to retrieve a pointer to the EFI Runtime Services Table.
+  #                  Only available to DXE and UEFI module types.
+  UefiRuntimeServicesTableLib|Include/Library/UefiRuntimeServicesTableLib.h
+
+[LibraryClasses.IA32, LibraryClasses.X64]
+  ##  @libraryclass  Provides services to generate random number.
+  #
+  RngLib|Include/Library/RngLib.h

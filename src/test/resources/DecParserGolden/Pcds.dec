@@ -1,0 +1,11 @@
+[PcdsFeatureFlag]
+  ## Indicates if the platform can support update capsule across a system reset.<BR><BR>
+  #   TRUE  - Supports update capsule across a system reset.<BR>
+  #   FALSE - Does not support update capsule across a system reset.<BR>
+  # @Prompt Enable update capsule across a system reset.
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSupportUpdateCapsuleReset|FALSE|BOOLEAN|0x0001001d
+
+[PcdsFixedAtBuild]
+  ## This value is used to configure X86 Processor FSB clock.
+  # @Prompt FSB Clock.
+  gEfiMdePkgTokenSpaceGuid.PcdFSBClock|200000000|UINT32|0x0000000c

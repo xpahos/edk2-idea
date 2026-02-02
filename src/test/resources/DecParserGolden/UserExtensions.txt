@@ -1,0 +1,12 @@
+EDK2 Dec File
+  PsiElement(DecTokenType.[)('[')
+  PsiElement(DecTokenType.WORD)('UserExtensions')
+  PsiElement(DecTokenType..)('.')
+  PsiErrorElement:DecTokenType.SECTION_NAME expected, got 'TianoCore'
+    PsiElement(DecTokenType.WORD)('TianoCore')
+  PsiElement(DecTokenType..)('.')
+  PsiElement(DecTokenType.STRING)('"ExtraFiles"')
+  PsiElement(DecTokenType.])(']')
+  PsiElement(DecTokenType.WORD)('MdePkgExtra')
+  PsiElement(DecTokenType..)('.')
+  PsiElement(DecTokenType.WORD)('uni')

@@ -1,0 +1,153 @@
+{
+  parserClass="org.tianocore.edk2idea.Fdf.FdfParser"
+
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="Fdf"
+  psiImplClassSuffix="Impl"
+  psiPackage="org.tianocore.edk2idea.Fdf.psi"
+  psiImplPackage="org.tianocore.edk2idea.Fdf.psi.impl"
+
+  elementTypeHolderClass="org.tianocore.edk2idea.Fdf.FdfTypes"
+  elementTypeClass="org.tianocore.edk2idea.Fdf.psi.FdfElementType"
+  tokenTypeClass="org.tianocore.edk2idea.Fdf.psi.FdfTokenType"
+  
+  tokens=[
+    EQ="="
+    PIPE="|"
+    DOT="."
+    COMMA=","
+    COLON=":"
+    LBRACE="{"
+    RBRACE="}"
+    RBRACE="}"
+    LBRACKET="["
+    RBRACKET="]"
+    LT="<"
+    GT=">"
+    
+    // Depex operators
+    DEPEX_AND="AND"
+    DEPEX_OR="OR"
+    DEPEX_NOT="NOT"
+    
+    // Preprocessor
+    INCLUDE="!include"
+    IFDEF="!ifdef"
+    IFNDEF="!ifndef"
+    IF="!if"
+    ELSEIF="!elseif"
+    ELSE="!else"
+    ENDIF="!endif"
+    ERROR="!error"
+    
+    // Comments
+    COMMENT="regexp:#[^\r\n]*"
+    
+    MACRO_REF="regexp:\$\([a-zA-Z0-9_\.]+\)"
+    LPAREN="("
+    RPAREN=")"
+    EQ_EQ="=="
+    NE="!="
+    LE="<="
+    GE=">="
+    // AND="&&" - Conflicts with DEPEX_AND? No, usually distinct contexts
+    AND_OP="&&"
+    OR_OP="||"
+    
+    // FDF Specific
+    APRIORI="APRIORI"
+    INF="INF"
+    FILE="FILE"
+    SECTION="SECTION"
+  ]
+}
+
+fdfFile ::= (fdfSection | directiveStatement | emptyLineOrComment)*
+
+// Directive
+directiveStatement ::= 
+    includeStatement | 
+    ifStatement | 
+    elseStatement | 
+    endifStatement |
+    errorStatement
+
+includeStatement ::= INCLUDE valueString CRLF
+ifStatement ::= (IF | IFDEF | IFNDEF | ELSEIF) valueString CRLF
+elseStatement ::= ELSE CRLF
+endifStatement ::= ENDIF CRLF
+errorStatement ::= ERROR valueString CRLF
+
+// Common
+emptyLineOrComment ::= COMMENT? CRLF
+
+// Generic Sections
+fdfSection ::= (
+    definesSection |
+    fdSection |
+    fvSection |
+    ruleSection |
+    capsuleSection |
+    optionRomSection |
+    unknownSection
+)
+
+// Section Headers
+private sectionHeader ::= 
+    DEFINES_SECTION_HEADER | 
+    FD_SECTION_HEADER | 
+    FV_SECTION_HEADER | 
+    RULE_SECTION_HEADER | 
+    CAPSULE_SECTION_HEADER | 
+    OPTION_ROM_SECTION_HEADER |
+    UNKNOWN_SECTION_HEADER
+
+unknownSection ::= UNKNOWN_SECTION_HEADER CRLF (unknownStatement | emptyLineOrComment)*
+unknownStatement ::= !sectionHeader regexLine CRLF
+regexLine ::= "[^\r\n]+" // Validation placeholder
+
+// Defines
+definesSection ::= DEFINES_SECTION_HEADER CRLF (defineStatement | directiveStatement | emptyLineOrComment)*
+defineStatement ::= defineEntry CRLF
+defineEntry ::= key EQ valueString
+
+// FD
+fdSection ::= FD_SECTION_HEADER CRLF (fdStatement | directiveStatement | emptyLineOrComment)*
+fdStatement ::= (fdRegion | fdProperty) CRLF
+fdProperty ::= key EQ valueString
+fdRegion ::= (HEX_NUMBER | MACRO_REF) PIPE (HEX_NUMBER | MACRO_REF | IDENTIFIER) (CRLF)? (emptyLineOrComment)* (fdRegionBlock)?
+fdRegionBlock ::= "FV" EQ IDENTIFIER
+
+// FV
+fvSection ::= FV_SECTION_HEADER CRLF (fvStatement | directiveStatement | emptyLineOrComment)*
+fvStatement ::= (fvProperty | aprioriBlock | infStatement | fileStatement | sectionStatement) CRLF
+fvProperty ::= key EQ valueString
+aprioriBlock ::= APRIORI IDENTIFIER LBRACE CRLF (infStatement | directiveStatement | emptyLineOrComment)* RBRACE
+infStatement ::= INF (valueString)* // 'INF' followed by path/options
+fileStatement ::= FILE (valueString)* LBRACE CRLF (sectionStatement | directiveStatement | emptyLineOrComment)* RBRACE
+
+// Rule
+ruleSection ::= RULE_SECTION_HEADER CRLF (ruleStatement | directiveStatement | emptyLineOrComment)*
+ruleStatement ::= (fileStatement | ruleProperty) CRLF
+ruleProperty ::= key EQ valueString 
+
+// Capsule ( Placeholder structure )
+capsuleSection ::= CAPSULE_SECTION_HEADER CRLF (capsuleStatement | directiveStatement | emptyLineOrComment)*
+capsuleStatement ::= capsuleProperty CRLF
+capsuleProperty ::= key EQ valueString
+
+// OptionRom ( Placeholder structure )
+optionRomSection ::= OPTION_ROM_SECTION_HEADER CRLF (optionRomStatement | directiveStatement | emptyLineOrComment)*
+optionRomStatement ::= optionRomProperty CRLF
+optionRomProperty ::= key EQ valueString
+
+// Generic Block
+blockStatement ::= LBRACE CRLF (blockContent | emptyLineOrComment)* RBRACE
+blockContent ::= fdfSection | directiveStatement | key
+
+// Values
+valueString ::= (IDENTIFIER | NUMBER | STRING | DOT | COMMA | LBRACE | RBRACE | HEX_NUMBER | PATH_STRING | PIPE | MINUS | STAR | GUID | COLON | EQ | MACRO_REF | LPAREN | RPAREN | EQ_EQ | NE | LE | GE | AND_OP | OR_OP | APRIORI | INF | FILE | SECTION)+
+
+key ::= key_part+
+private key_part ::= IDENTIFIER | PATH_STRING | NUMBER | HEX_NUMBER | STAR | MINUS | DOT

@@ -1,0 +1,1 @@
+rootProject.name = "edk2-idea"

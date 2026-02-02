@@ -1,0 +1,13 @@
+[Defines]
+  INF_VERSION                = 0x00010017
+  BASE_NAME                  = UefiPxeBcDxe
+  FILE_GUID                  = B95E9FDA-26DE-48d2-8807-1F9107AC5E3A
+  MODULE_TYPE                = DXE_DRIVER
+  VERSION_STRING             = 1.0
+
+[BuildOptions.X64]
+  ## @AsBuilt
+  GCC:DEBUG_CLANGPDB_X64_ASMLINK_FLAGS = /nologo /tiny
+  GCC:DEBUG_CLANGPDB_X64_DLINK_FLAGS = /NOLOGO /NODEFAULTLIB /IGNORE:4001 /OPT:REF /OPT:ICF=10 /ALIGN:32 /DRIVER /FILEALIGN:32 /Machine:X64 /DLL /ENTRY:$(IMAGE_ENTRY_POINT) /SUBSYSTEM:EFI_BOOT_SERVICE_DRIVER /SAFESEH:NO /BASE:0 /DEBUG:GHASH /MLLVM:-exception-model=wineh /lldmap
+  GCC:DEBUG_CLANGPDB_X64_CC_FLAGS = -g -Os -fshort-wchar -fno-builtin -fno-strict-aliasing -Wall -Werror -Wno-array-bounds -include AutoGen.h -fno-common -fstack-protector -ffunction-sections -fdata-sections -DSTRING_ARRAY_NAME=$(BASE_NAME)Strings -Wno-parentheses-equality -Wno-tautological-compare -Wno-tautological-constant-out-of-range-compare -Wno-empty-body -Wno-unused-const-variable -Wno-varargs -Wno-unknown-warning-option -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-unaligned-access -Wno-microsoft-enum-forward-reference -fno-stack-protector -funsigned-char -ftrap-function=undefined_behavior_has_been_optimized_away_by_clang -Wno-address -Wno-shift-negative-value -Wno-unknown-pragmas -Wno-incompatible-library-redeclaration -Wno-null-dereference -mno-implicit-float -mms-bitfields -mno-stack-arg-probe -fno-omit-frame-pointer -D __GNUC__=4 -D __GNUC_MINOR__=2 -D __GNUC_PATCHLEVEL__=1 -D __MINGW32__=1 -m64 "-DEFIAPI=__attribute__((ms_abi))" -mno-red-zone -mcmodel=small -Oz -flto -target x86_64-pc-windows-msvc -gcodeview  -funwind-tables -D DISABLE_NEW_DEPRECATED_INTERFACES -D TDX_GUEST_SUPPORTED -D ENABLE_MD5_DEPRECATED_INTERFACES
+  # 日本語 build options

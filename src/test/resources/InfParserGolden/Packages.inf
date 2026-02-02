@@ -1,0 +1,16 @@
+[Defines]
+  INF_VERSION                = 0x00010017
+  BASE_NAME                  = UefiPxeBcDxe
+  FILE_GUID                  = B95E9FDA-26DE-48d2-8807-1F9107AC5E3A
+  MODULE_TYPE                = DXE_DRIVER
+  VERSION_STRING             = 1.0
+
+[Packages]
+  MdePkg/MdePkg.dec
+  # 日本語 packages
+
+[Packages.X64]
+  MdePkg/MdePkg.dec
+  NetworkPkg/NetworkPkg.dec
+  OvmfPkg/OvmfPkg.dec
+  MdeModulePkg/MdeModulePkg.dec

@@ -1,0 +1,164 @@
+{
+  parserClass="org.tianocore.edk2idea.Dsc.DscParser"
+
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="Dsc"
+  psiImplClassSuffix="Impl"
+  psiPackage="org.tianocore.edk2idea.Dsc.psi"
+  psiImplPackage="org.tianocore.edk2idea.Dsc.psi.impl"
+
+  elementTypeHolderClass="org.tianocore.edk2idea.Dsc.DscTypes"
+  elementTypeClass="org.tianocore.edk2idea.Dsc.psi.DscElementType"
+  tokenTypeClass="org.tianocore.edk2idea.Dsc.psi.DscTokenType"
+  
+  tokens=[
+    EQ="="
+    PIPE="|"
+    DOT="."
+    COMMA=","
+    COLON=":"
+    LBRACE="{"
+    RBRACE="}"
+    RBRACE="}"
+    LBRACKET="["
+    RBRACKET="]"
+    LT="<"
+    GT=">"
+    
+    // Depex operators
+    DEPEX_AND="AND"
+    DEPEX_OR="OR"
+    DEPEX_NOT="NOT"
+    
+    // Preprocessor
+    INCLUDE="!include"
+    IFDEF="!ifdef"
+    IFNDEF="!ifndef"
+    IF="!if"
+    ELSEIF="!elseif"
+    ELSE="!else"
+    ENDIF="!endif"
+    ERROR="!error"
+    
+    // Comments
+    COMMENT="regexp:#[^\r\n]*"
+    
+    MACRO_REF="regexp:\$\([a-zA-Z0-9_\.]+\)"
+    LPAREN="("
+    RPAREN=")"
+    EQ_EQ="=="
+    NE="!="
+    LE="<="
+    GE=">="
+    AND="&&"
+    OR="||"
+  ]
+}
+
+dscFile ::= (definesSection | otherSection | directiveStatement | emptyLineOrComment)*
+
+// Directive
+directiveStatement ::= 
+    includeStatement | 
+    ifStatement | 
+    elseStatement | 
+    endifStatement |
+    errorStatement
+
+includeStatement ::= INCLUDE valueString CRLF
+ifStatement ::= (IF | IFDEF | IFNDEF | ELSEIF) valueString CRLF
+elseStatement ::= ELSE CRLF
+endifStatement ::= ENDIF CRLF
+errorStatement ::= ERROR valueString CRLF
+
+// Common
+emptyLineOrComment ::= COMMENT? CRLF
+
+// Generic Sections
+otherSection ::= (
+    packagesSection |
+    libraryClassesSection |
+    pcdSection |
+    buildOptionsSection |
+    skuIdsSection |
+    componentsSection |
+    defaultStoresSection |
+    stringsSection |
+    unknownSection
+)
+
+// Section Headers
+private sectionHeader ::= 
+    DEFINES_SECTION_HEADER | 
+    PACKAGES_SECTION_HEADER | 
+    LIBRARY_CLASSES_SECTION_HEADER | 
+    PCD_SECTION_HEADER | 
+    BUILD_OPTIONS_SECTION_HEADER | 
+    SKU_IDS_SECTION_HEADER | 
+    COMPONENTS_SECTION_HEADER | 
+    DEFAULT_STORES_SECTION_HEADER |
+    STRINGS_SECTION_HEADER |
+    UNKNOWN_SECTION_HEADER
+
+unknownSection ::= UNKNOWN_SECTION_HEADER CRLF (unknownStatement | emptyLineOrComment)*
+unknownStatement ::= !sectionHeader regexLine CRLF
+regexLine ::= "[^\r\n]+" // Validation placeholder
+
+// Defines
+definesSection ::= DEFINES_SECTION_HEADER CRLF (defineStatement | directiveStatement | emptyLineOrComment)*
+defineStatement ::= defineEntry CRLF
+defineEntry ::= key EQ valueString
+
+// Strings
+stringsSection ::= STRINGS_SECTION_HEADER CRLF (stringsStatement | directiveStatement | emptyLineOrComment)*
+stringsStatement ::= key EQ valueString CRLF
+
+// Packages
+packagesSection ::= PACKAGES_SECTION_HEADER CRLF (packageStatement | directiveStatement | emptyLineOrComment)*
+packageStatement ::= packageEntry CRLF
+packageEntry ::= PATH_STRING
+
+// Library Classes
+libraryClassesSection ::= LIBRARY_CLASSES_SECTION_HEADER CRLF (libraryClassStatement | directiveStatement | emptyLineOrComment)*
+libraryClassStatement ::= libraryClassEntry CRLF
+libraryClassEntry ::= key PIPE PATH_STRING
+
+// Pcds
+pcdSection ::= PCD_SECTION_HEADER CRLF (pcdStatement | directiveStatement | emptyLineOrComment)*
+pcdStatement ::= pcdEntry CRLF
+pcdEntry ::= pcdName PIPE valueString
+pcdName ::= key (DOT key)*
+
+// Build Options
+buildOptionsSection ::= BUILD_OPTIONS_SECTION_HEADER CRLF (buildOptionStatement | directiveStatement | emptyLineOrComment)*
+buildOptionStatement ::= buildOptionEntry CRLF
+buildOptionEntry ::= key (COLON key)* EQ valueString
+
+// SkuIds
+skuIdsSection ::= SKU_IDS_SECTION_HEADER CRLF (skuIdStatement | directiveStatement | emptyLineOrComment)*
+skuIdStatement ::= skuIdEntry CRLF
+skuIdEntry ::= (NUMBER|key) PIPE key
+
+// Components (Complex!)
+componentsSection ::= COMPONENTS_SECTION_HEADER CRLF (componentStatement | directiveStatement | emptyLineOrComment)*
+componentStatement ::= PATH_STRING (nestedBlock)? CRLF
+nestedBlock ::= LBRACE CRLF (nestedSection | emptyLineOrComment)* RBRACE
+nestedSection ::= 
+    nestedLibraryClassesSection |
+    nestedPcdSection |
+    nestedBuildOptionsSection
+
+nestedLibraryClassesSection ::= LT "LibraryClasses" GT CRLF (libraryClassStatement | emptyLineOrComment)*
+nestedPcdSection ::= LT "Pcds" (IDENTIFIER)? GT CRLF (pcdStatement | emptyLineOrComment)*
+nestedBuildOptionsSection ::= LT "BuildOptions" GT CRLF (buildOptionStatement | emptyLineOrComment)*
+
+// DefaultStores (seen in newer specs, rare in samples but good to have)
+defaultStoresSection ::= DEFAULT_STORES_SECTION_HEADER CRLF (defaultStoreStatement | directiveStatement | emptyLineOrComment)*
+defaultStoreStatement ::= NUMBER PIPE IDENTIFIER CRLF
+
+// Values
+valueString ::= (IDENTIFIER | NUMBER | STRING | DOT | COMMA | LBRACE | RBRACE | HEX_NUMBER | PATH_STRING | PIPE | MINUS | STAR | GUID | COLON | EQ | MACRO_REF | LPAREN | RPAREN | EQ_EQ | NE | LE | GE | AND | OR)+
+
+key ::= key_part+
+private key_part ::= IDENTIFIER | PATH_STRING | NUMBER | HEX_NUMBER | STAR | MINUS

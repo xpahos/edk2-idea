@@ -1,0 +1,19 @@
+// Basic String Definition
+#string STR_EXAMPLE_1          #language en-US "Example String 1"
+
+// Japanese Characters Edge Case
+#string STR_EXAMPLE_JP         #language en-US "Example with Japanese: こんにちは"
+
+// Multi-line / Concatenated Strings
+#string STR_EXAMPLE_MULTI      #language en-US "Line 1 "
+                                               "Line 2"
+
+// French (just to show multiple languages)
+#string STR_EXAMPLE_FR         #language fr-FR "Exemple"
+
+// String with Escape Sequences
+#string STR_EXAMPLE_ESC        #language en-US "Line 1\r\nLine 2"
+
+// Control codes
+// /xXXXX format is used in UNI for unicode chars sometimes, need to verify strictness
+#string STR_EXAMPLE_CODE       #language en-US "Char: \x25B6"

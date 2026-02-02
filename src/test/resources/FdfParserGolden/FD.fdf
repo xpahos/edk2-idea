@@ -1,0 +1,9 @@
+[FD.OVMF_VARS]
+BaseAddress   = $(FW_BASE_ADDRESS)
+Size          = $(VARS_SIZE)
+ErasePolarity = 1
+BlockSize     = $(BLOCK_SIZE)
+NumBlocks     = $(VARS_BLOCKS)
+
+0x00000000|$(FVMAIN_SIZE)
+FV = FVMAIN_COMPACT

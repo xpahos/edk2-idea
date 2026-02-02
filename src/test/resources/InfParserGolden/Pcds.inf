@@ -1,0 +1,23 @@
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = CapsuleOnDiskLoadPei
+  FILE_GUID                      = 8ADEDF9E-2EC8-40fb-AE56-B76D90225D2D
+  MODULE_TYPE                    = PEIM
+  VERSION_STRING                 = 1.0
+
+[Pcd]
+  gEfiMdeModulePkgTokenSpaceGuid.PcdCoDRelocationFileName                 ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdCapsuleMax                            ## CONSUMES
+
+[PcdEx]
+  gEfiMdeModulePkgTokenSpaceGuid.PcdRecoveryFileName                      ## PRODUCES
+  # 日本語 PcdEx
+
+[FixedPcd]
+  gEfiMdePkgTokenSpaceGuid.PcdVerifyNodeInList
+
+[FeaturePcd]
+  gEfiMdePkgTokenSpaceGuid.PcdComponentName2Disable|TRUE
+
+[PatchPcd.X64]
+  # Empty section test

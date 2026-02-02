@@ -1,0 +1,15 @@
+[Defines]
+  INF_VERSION = 1.25
+  BASE_NAME = LibraryClassesTest
+  FILE_GUID = 00000000-0000-0000-0000-000000000001
+  MODULE_TYPE = BASE
+  VERSION_STRING = 1.0
+
+[LibraryClasses]
+  BaseLib
+  DebugLib
+  
+  # ありがとう
+  PcdLib | TRUE
+  
+  MemoryAllocationLib | gEfiEnabled

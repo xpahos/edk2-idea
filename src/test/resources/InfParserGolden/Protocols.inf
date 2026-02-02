@@ -1,0 +1,13 @@
+[Defines]
+  INF_VERSION = 1.25
+  BASE_NAME = ProtocolsTest
+  FILE_GUID = 00000000-0000-0000-0000-000000000002
+  MODULE_TYPE = DXE_DRIVER
+  VERSION_STRING = 1.0
+
+[Protocols]
+  gEfiBlockIoProtocolGuid ## SOMETIMES_CONSUMES
+  gEfiDiskIoProtocolGuid
+  
+  # ありがとう
+  gEfiSimpleFileSystemProtocolGuid | gEfiFeatureFlag

@@ -1,0 +1,11 @@
+[Defines]
+
+[Sources]
+  main.c
+  not_main.c
+  path/to/file.c second.h
+
+
+  file.c # comment
+  # comment line
+  otherfile.c

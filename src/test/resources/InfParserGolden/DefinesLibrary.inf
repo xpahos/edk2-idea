@@ -1,0 +1,7 @@
+[Defines]
+  INF_VERSION = 1.27
+  BASE_NAME = LzmaCustomDecompressLib
+  FILE_GUID = 22f8406f-43ee-492f-82f5-4e8a1a58e6d2
+  MODULE_TYPE = BASE
+  VERSION_STRING = 1.0
+  LIBRARY_CLASS = CustomDecompressLib

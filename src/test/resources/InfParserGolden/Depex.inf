@@ -1,0 +1,18 @@
+[Defines]
+  INF_VERSION = 1.25
+  BASE_NAME = DepexTest
+  FILE_GUID = 00000000-0000-0000-0000-000000000006
+  MODULE_TYPE = DXE_DRIVER
+  VERSION_STRING = 1.0
+
+[Depex]
+  TRUE
+
+[Depex.IA32]
+  gEfiPeiMasterBootModePpiGuid AND
+  gEfiPeiMemoryDiscoveredPpiGuid
+  
+  # ありがとう
+
+[Depex.X64]
+  (gEfiPeiMasterBootModePpiGuid OR gEfiPeiMemoryDiscoveredPpiGuid) AND gEfiPeiReadOnlyVariable2PpiGuid
