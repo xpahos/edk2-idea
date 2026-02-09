@@ -11,7 +11,9 @@ import com.intellij.psi.TokenType;
 %implements FlexLexer
 %unicode
 %function advance
+%function advance
 %type IElementType
+%caseless
 %eof{ return;
 %eof}
 
@@ -49,7 +51,7 @@ HEX_DIGIT = [0-9a-fA-F]
 // Identifiers
 IDENTIFIER = {ALPHA}{ALPHANUM}*
 BASE_NAME_STRING = [a-zA-Z0-9][a-zA-Z0-9_\-\.]*
-PATH_STRING = ({BASE_NAME_STRING}|[\/\\])+
+PATH_STRING = ({BASE_NAME_STRING}|[\/\\]|\.)+
 
 // Numbers
 HEX_NUMBER = 0[xX]{HEX_DIGIT}+
@@ -60,7 +62,7 @@ DECIMAL_NUMBER = {DIGIT}+
 GUID = {HEX_DIGIT}{8}-{HEX_DIGIT}{4}-{HEX_DIGIT}{4}-{HEX_DIGIT}{4}-{HEX_DIGIT}{12}
 
 // Strings
-STRING = \"([^\"\r\n]*)\"
+STRING = L?\"([^\"\r\n]*)\"
 SINGLE_QUOTED_STRING = '([^'\r\n]*)'
 
 // Comments
@@ -88,7 +90,10 @@ HASH_COMMENT = #[^\r\n]*
 %state DEFINES_SECTION_WAITING_MAKEFILE
 %state DEFINES_SECTION_WAITING_EQ_IDENTIFIER
 %state DEFINES_SECTION_WAITING_EQ_DECIMAL_VERSION
+%state DEFINES_SECTION_WAITING_ARCH_LIST
 %state BUILD_OPTIONS_SECTION
+%state DEFINES_SECTION_WAITING_DEFINE_VALUE
+
 
 %%
 
@@ -101,22 +106,29 @@ HASH_COMMENT = #[^\r\n]*
 
     // Section Headers
     \[Defines(\.[a-zA-Z0-9]+)?\]         { pushState(DEFINES_SECTION); return InfTypes.DEFINES_SECTION_HEADER; }
-    \[Sources(\.[a-zA-Z0-9]+)?\]         { pushState(SOURCES_SECTION); return InfTypes.SOURCES_SECTION_HEADER; }
-    \[Packages(\.[a-zA-Z0-9]+)?\]        { return InfTypes.PACKAGES_SECTION_HEADER; }
-    \[LibraryClasses(\.[a-zA-Z0-9]+)?\]  { return InfTypes.LIBRARY_CLASSES_SECTION_HEADER; }
-    \[Protocols(\.[a-zA-Z0-9]+)?\]       { return InfTypes.PROTOCOLS_SECTION_HEADER; }
-    \[Guids(\.[a-zA-Z0-9]+)?\]           { return InfTypes.GUIDS_SECTION_HEADER; }
-    \[Ppis(\.[a-zA-Z0-9]+)?\]            { return InfTypes.PPIS_SECTION_HEADER; }
-    \[Pcd(Ex)?(\.[a-zA-Z0-9]+)?\]        { return InfTypes.PCD_SECTION_HEADER; }
-    \[FixedPcd\]                         { return InfTypes.PCD_SECTION_HEADER; }
-    \[FeaturePcd\]                       { return InfTypes.PCD_SECTION_HEADER; }
-    \[PatchPcd\]                         { return InfTypes.PCD_SECTION_HEADER; }
-    \[Depex(\.[a-zA-Z0-9]+)?\]           { pushState(DEPEX_SECTION); return InfTypes.DEPEX_SECTION_HEADER; }
-    \[Binaries(\.[a-zA-Z0-9]+)?\]        { return InfTypes.BINARIES_SECTION_HEADER; }
-    \[UserExtensions[^\]]*\]             { return InfTypes.USER_EXTENSIONS_SECTION_HEADER; }
-    \[BuildOptions(\.[a-zA-Z0-9]+)?\]    { pushState(BUILD_OPTIONS_SECTION); return InfTypes.BUILD_OPTIONS_SECTION_HEADER; }
+    \[Sources[^\]\r\n]*\]                { pushState(SOURCES_SECTION); return InfTypes.SOURCES_SECTION_HEADER; }
+    \[Packages[^\]\r\n]*\]               { return InfTypes.PACKAGES_SECTION_HEADER; }
+    \[LibraryClasses[^\]\r\n]*\]         { return InfTypes.LIBRARY_CLASSES_SECTION_HEADER; }
+    \[Protocols[^\]\r\n]*\]              { return InfTypes.PROTOCOLS_SECTION_HEADER; }
+    \[Guids[^\]\r\n]*\]                  { return InfTypes.GUIDS_SECTION_HEADER; }
+    \[Ppis[^\]\r\n]*\]                   { return InfTypes.PPIS_SECTION_HEADER; }
+    \[Pcd(Ex)?[^\]\r\n]*\]               { return InfTypes.PCD_SECTION_HEADER; }
+    \[FixedPcd[^\]\r\n]*\]               { return InfTypes.PCD_SECTION_HEADER; }
+    \[FeaturePcd[^\]\r\n]*\]             { return InfTypes.PCD_SECTION_HEADER; }
+    \[PatchPcd[^\]\r\n]*\]               { return InfTypes.PCD_SECTION_HEADER; }
+    \[Depex[^\]\r\n]*\]                  { pushState(DEPEX_SECTION); return InfTypes.DEPEX_SECTION_HEADER; }
+    \[Binaries[^\]\r\n]*\]               { return InfTypes.BINARIES_SECTION_HEADER; }
+    \[UserExtensions[^\]\r\n]*\]         { return InfTypes.USER_EXTENSIONS_SECTION_HEADER; }
+    \[BuildOptions[^\]\r\n]*\]           { pushState(BUILD_OPTIONS_SECTION); return InfTypes.BUILD_OPTIONS_SECTION_HEADER; }
     \[[^\]]+\]                           { return InfTypes.UNKNOWN_SECTION_HEADER; }
 
+
+    // Boolean Operators
+    "NOT"                            { return InfTypes.NOT; }
+    "AND"                            { return InfTypes.AND; }
+    "OR"                             { return InfTypes.OR; }
+    "TRUE"                           { return InfTypes.BOOLEAN_VALUE; }
+    "FALSE"                          { return InfTypes.BOOLEAN_VALUE; }
 
     // Architecture
     //"IA32"                           { return InfTypes.ARCH; }
@@ -137,6 +149,8 @@ HASH_COMMENT = #[^\r\n]*
 
     // Binary types
     "PE32"                           { return InfTypes.BINARY_TYPE; }
+    "BIN"                            { return InfTypes.BINARY_TYPE; }
+    "LIB"                            { return InfTypes.BINARY_TYPE; }
     "DXE_DEPEX"                      { return InfTypes.BINARY_TYPE; }
     "UI"                             { return InfTypes.BINARY_TYPE; }
     "VERSION"                        { return InfTypes.BINARY_TYPE; }
@@ -164,6 +178,7 @@ HASH_COMMENT = #[^\r\n]*
     "BASE_NAME"                      { pushState(DEFINES_SECTION_WAITING_BASE_NAME_STRING); return InfTypes.BASE_NAME; }
     "FILE_GUID"                      { pushState(DEFINES_SECTION_WAITING_GUID); return InfTypes.FILE_GUID; }
     "EDK_RELEASE_VERSION"            { pushState(DEFINES_SECTION_WAITING_HEX_NUMBER); return InfTypes.EDK_RELEASE_VERSION; }
+    "EFI_SPECIFICATION_VERSION"      { pushState(DEFINES_SECTION_WAITING_HEX_NUMBER); return InfTypes.EFI_SPECIFICATION_VERSION; }
     "PI_SPECIFICATION_VERSION"       { pushState(DEFINES_SECTION_WAITING_HEX_N_VERSION_NUMBER); return InfTypes.PI_SPECIFICATION_VERSION; }
     "UEFI_SPECIFICATION_VERSION"     { pushState(DEFINES_SECTION_WAITING_HEX_N_VERSION_NUMBER); return InfTypes.UEFI_SPECIFICATION_VERSION; }
     "MODULE_TYPE"                    { pushState(DEFINES_SECTION_WAITING_MODULE_TYPE); return InfTypes.MODULE_TYPE; }
@@ -186,23 +201,34 @@ HASH_COMMENT = #[^\r\n]*
     "SPEC"                           { pushState(DEFINES_SECTION_WAITING_EQ_DECIMAL_VERSION);return InfTypes.SPEC; }
     "CUSTOM_MAKEFILE"                { pushState(DEFINES_SECTION_WAITING_MAKEFILE); return InfTypes.CUSTOM_MAKEFILE; }
     "DPX_SOURCE"                     { pushState(DEFINES_SECTION_WAITING_PATH_STRING); return InfTypes.DPX_SOURCE; }
+    "VALID_ARCHITECTURES"            { pushState(DEFINES_SECTION_WAITING_ARCH_LIST); return InfTypes.VALID_ARCHITECTURES; }
 
+    <<EOF>>                          { clearStack(); yybegin(EOF); return InfTypes.CRLF; }
+}
+
+<DEFINES_SECTION_WAITING_ARCH_LIST> {
+    {IDENTIFIER}                     { return InfTypes.IDENTIFIER; }
+    {CRLF}                           { popState(); return InfTypes.CRLF; }
+    {WHITE_SPACE}                    { return TokenType.WHITE_SPACE; }
     <<EOF>>                          { clearStack(); yybegin(EOF); return InfTypes.CRLF; }
 }
 
 <DEFINES_SECTION_WAITING_HEX_N_VERSION_NUMBER> {
     {HEX_NUMBER}                     { popState(); return InfTypes.HEX_NUMBER; }
     {VERSION_NUMBER}                 { popState(); return InfTypes.VERSION_NUMBER; }
+    {WHITE_SPACE}                    { return TokenType.WHITE_SPACE; }
     <<EOF>>                          { clearStack(); yybegin(EOF); return InfTypes.CRLF; }
 }
 
 <DEFINES_SECTION_WAITING_BASE_NAME_STRING> {
     {BASE_NAME_STRING}               { popState(); return InfTypes.BASE_NAME_STRING; }
+    {WHITE_SPACE}                    { return TokenType.WHITE_SPACE; }
     <<EOF>>                          { clearStack(); yybegin(EOF); return InfTypes.CRLF; }
 }
 
 <DEFINES_SECTION_WAITING_GUID> {
     {GUID}                           { popState(); return InfTypes.GUID; }
+    {WHITE_SPACE}                    { return TokenType.WHITE_SPACE; }
     <<EOF>>                          { clearStack(); yybegin(EOF); return InfTypes.CRLF; }
 }
 
@@ -220,24 +246,31 @@ HASH_COMMENT = #[^\r\n]*
     "UEFI_DRIVER"                    { popState(); return InfTypes.MODULE_TYPE_VALUE; }
     "UEFI_APPLICATION"               { popState(); return InfTypes.MODULE_TYPE_VALUE; }
     "SMM_CORE"                       { popState(); return InfTypes.MODULE_TYPE_VALUE; }
+    "SMM_DRIVER"                     { popState(); return InfTypes.MODULE_TYPE_VALUE; }
     "MM_STANDALONE"                  { popState(); return InfTypes.MODULE_TYPE_VALUE; }
     "MM_CORE_STANDALONE"             { popState(); return InfTypes.MODULE_TYPE_VALUE; }
+
+    "HOST_APPLICATION"               { popState(); return InfTypes.MODULE_TYPE_VALUE; }
     "USER_DEFINED"                   { popState(); return InfTypes.MODULE_TYPE_VALUE; }
+    {WHITE_SPACE}                    { return TokenType.WHITE_SPACE; }
     <<EOF>>                          { clearStack(); yybegin(EOF); return InfTypes.CRLF; }
 }
 
 <DEFINES_SECTION_WAITING_HEX_NUMBER> {
     {HEX_NUMBER}                     { popState(); return InfTypes.HEX_NUMBER; }
+    {WHITE_SPACE}                    { return TokenType.WHITE_SPACE; }
     <<EOF>>                          { clearStack(); yybegin(EOF); return InfTypes.CRLF; }
 }
 
 <DEFINES_SECTION_WAITING_DECIMAL_VERSION> {
     {VERSION_NUMBER}                 { popState(); return InfTypes.VERSION_NUMBER; }
+    {WHITE_SPACE}                    { return TokenType.WHITE_SPACE; }
     <<EOF>>                          { clearStack(); yybegin(EOF); return InfTypes.CRLF; }
 }
 
 <DEFINES_SECTION_WAITING_DECIMAL_NUMBER> {
     {DECIMAL_NUMBER}                 { popState(); return InfTypes.NUMBER; }
+    {WHITE_SPACE}                    { return TokenType.WHITE_SPACE; }
     <<EOF>>                          { clearStack(); yybegin(EOF); return InfTypes.CRLF; }
 }
 
@@ -254,51 +287,71 @@ HASH_COMMENT = #[^\r\n]*
     "UEFI_DRIVER"                    { return InfTypes.MODULE_TYPE_VALUE; }
     "UEFI_APPLICATION"               { return InfTypes.MODULE_TYPE_VALUE; }
     "SMM_CORE"                       { return InfTypes.MODULE_TYPE_VALUE; }
+    "SMM_DRIVER"                     { return InfTypes.MODULE_TYPE_VALUE; }
     "MM_STANDALONE"                  { return InfTypes.MODULE_TYPE_VALUE; }
     "MM_CORE_STANDALONE"             { return InfTypes.MODULE_TYPE_VALUE; }
     "USER_DEFINED"                   { return InfTypes.MODULE_TYPE_VALUE; }
+    "HOST_APPLICATION"               { return InfTypes.MODULE_TYPE_VALUE; }
 
     {IDENTIFIER}                     { return InfTypes.IDENTIFIER; }
     {CRLF}                           { popState(); return InfTypes.CRLF; }
+    {WHITE_SPACE}                    { return TokenType.WHITE_SPACE; }
     <<EOF>>                          { clearStack(); yybegin(EOF); return InfTypes.CRLF; }
 }
 
 <DEFINES_SECTION_WAITING_HEX_NUMBER> {
     {HEX_NUMBER}                     { popState(); InfTypes.HEX_NUMBER; }
+    {WHITE_SPACE}                    { return TokenType.WHITE_SPACE; }
     <<EOF>>                          { clearStack(); yybegin(EOF); return InfTypes.CRLF; }
 }
 
 <DEFINES_SECTION_WAITING_BOOLEAN> {
     "TRUE"                           { popState(); return InfTypes.BOOLEAN_VALUE; }
     "FALSE"                          { popState(); return InfTypes.BOOLEAN_VALUE; }
+    {WHITE_SPACE}                    { return TokenType.WHITE_SPACE; }
     <<EOF>>                          { clearStack(); yybegin(EOF); return InfTypes.CRLF; }
 }
 
 <DEFINES_SECTION_WAITING_PCD_DRIVER> {
     "PEI_PCD_DRIVER"                 { popState(); return InfTypes.PCD_DRIVER_TYPE; }
     "DXE_PCD_DRIVER"                 { popState(); return InfTypes.PCD_DRIVER_TYPE; }
+    {WHITE_SPACE}                    { return TokenType.WHITE_SPACE; }
     <<EOF>>                          { clearStack(); yybegin(EOF); return InfTypes.CRLF; }
 }
 
 <DEFINES_SECTION_WAITING_IDENTIFIER> {
     {IDENTIFIER}                     { popState(); return InfTypes.IDENTIFIER; }
+    {WHITE_SPACE}                    { return TokenType.WHITE_SPACE; }
     <<EOF>>                          { clearStack(); yybegin(EOF); return InfTypes.CRLF; }
 }
 
 <DEFINES_SECTION_WAITING_PATH_STRING> {
     {PATH_STRING}                    { popState(); return InfTypes.PATH_STRING; }
+    {WHITE_SPACE}                    { return TokenType.WHITE_SPACE; }
     <<EOF>>                          { clearStack(); yybegin(EOF); return InfTypes.CRLF; }
 }
 
 <DEFINES_SECTION_WAITING_EQ_IDENTIFIER> {
+    "="                              { yybegin(DEFINES_SECTION_WAITING_DEFINE_VALUE); return InfTypes.EQUALS; }
     {IDENTIFIER}                     { return InfTypes.IDENTIFIER; }
     {CRLF}                           { popState(); return InfTypes.CRLF; }
+    {WHITE_SPACE}                    { return TokenType.WHITE_SPACE; }
     <<EOF>>                          { clearStack(); yybegin(EOF); return InfTypes.CRLF; }
+    [^]                              { return TokenType.BAD_CHARACTER; }
+}
+
+<DEFINES_SECTION_WAITING_DEFINE_VALUE> {
+    {CRLF}                           { popState(); return InfTypes.CRLF; }
+    {WHITE_SPACE}                    { return TokenType.WHITE_SPACE; }
+    [^#\r\n]+                        { return InfTypes.DEFINE_VALUE; }
+    <<EOF>>                          { clearStack(); yybegin(EOF); return InfTypes.CRLF; }
+    [^]                              { return TokenType.BAD_CHARACTER; }
 }
 
 <DEFINES_SECTION_WAITING_EQ_DECIMAL_VERSION> {
     {IDENTIFIER}                     { return InfTypes.IDENTIFIER; }
     {VERSION_NUMBER}                 { popState(); return InfTypes.VERSION_NUMBER; }
+    {WHITE_SPACE}                    { return TokenType.WHITE_SPACE; }
     <<EOF>>                          { clearStack(); yybegin(EOF); return InfTypes.CRLF; }
 }
 
@@ -307,6 +360,7 @@ HASH_COMMENT = #[^\r\n]*
     "GCC"                            { return InfTypes.COMPILER_TYPE; }
     "MSFT"                           { return InfTypes.COMPILER_TYPE; }
     {PATH_STRING}                    { popState(); return InfTypes.PATH_STRING; }
+    {WHITE_SPACE}                    { return TokenType.WHITE_SPACE; }
     <<EOF>>                          { clearStack(); yybegin(EOF); return InfTypes.CRLF; }
     <<EOF>>                          { clearStack(); yybegin(EOF); return InfTypes.CRLF; }
 }
@@ -322,7 +376,7 @@ HASH_COMMENT = #[^\r\n]*
     [a-zA-Z0-9_*]+(:[a-zA-Z0-9_*_]+)*    { return InfTypes.IDENTIFIER; }
 
     // Flags (RHS) starting with - or /
-    [-/][a-zA-Z0-9_\-+=.:]+              { return InfTypes.IDENTIFIER; }
+    [-/][a-zA-Z0-9_\-+=.:,]+              { return InfTypes.IDENTIFIER; }
 
     // Make macros $(VAR)
     \$\([a-zA-Z0-9_]+\)                  { return InfTypes.IDENTIFIER; }
@@ -346,8 +400,17 @@ HASH_COMMENT = #[^\r\n]*
 
 <SOURCES_SECTION> {
     "[" { yypushback(1); popState(); }
+
+    "|"                              { return InfTypes.PIPE; }
+    {CRLF}                           { return InfTypes.CRLF; }
+    {WHITE_SPACE}                    { return TokenType.WHITE_SPACE; }
+    {HASH_COMMENT}                   { return InfTypes.COMMENT; }
+
+    {IDENTIFIER}                     { return InfTypes.IDENTIFIER; }
     {PATH_STRING}                    { return InfTypes.PATH_STRING; }
+
     <<EOF>>                          { clearStack(); yybegin(EOF); return InfTypes.CRLF; }
+    [^]                              { return TokenType.BAD_CHARACTER; }
 }
 
 

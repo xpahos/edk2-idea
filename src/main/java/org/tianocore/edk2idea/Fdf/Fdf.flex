@@ -31,6 +31,7 @@ NUMBER = [0-9]+
 GUID = [0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}
 
 %state WAITING_VALUE
+%state WAITING_INCLUDE_PATH
 %state EOF
 
 %%
@@ -45,7 +46,7 @@ GUID = [0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{1
     \[OptionRom\.[a-zA-Z0-9_\.]+\]                { return FdfTypes.OPTION_ROM_SECTION_HEADER; }
     
     // Directives
-    "!include"                       { return FdfTypes.INCLUDE; }
+    "!include"                       { yybegin(WAITING_INCLUDE_PATH); return FdfTypes.INCLUDE; }
     "!ifdef"                         { return FdfTypes.IFDEF; }
     "!ifndef"                        { return FdfTypes.IFNDEF; }
     "!if"                            { return FdfTypes.IF; }
@@ -59,6 +60,7 @@ GUID = [0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{1
     "INF"                            { return FdfTypes.INF; }
     "FILE"                           { return FdfTypes.FILE; }
     "SECTION"                        { return FdfTypes.SECTION; }
+    "SET"                            { return FdfTypes.SET; }
 
     // Symbols
     "="                              { return FdfTypes.EQ; }
@@ -79,6 +81,13 @@ GUID = [0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{1
     "!="                             { return FdfTypes.NE; }
     "<="                             { return FdfTypes.LE; }
     ">="                             { return FdfTypes.GE; }
+    "+"                              { return FdfTypes.PLUS; }
+    "-"                              { return FdfTypes.MINUS; }
+    "/"                              { return FdfTypes.DIV; }
+    "%"                              { return FdfTypes.MOD; }
+    "&"                              { return FdfTypes.BIT_AND; }
+    "^"                              { return FdfTypes.XOR; }
+    "~"                              { return FdfTypes.BIT_NOT; }
     "&&"                             { return FdfTypes.AND_OP; }
     "||"                             { return FdfTypes.OR_OP; }
 
@@ -97,6 +106,13 @@ GUID = [0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{1
     {WHITE_SPACE}                    { return TokenType.WHITE_SPACE; }
     {HASH_COMMENT}                   { return FdfTypes.COMMENT; }
     
+    <<EOF>>                          { yybegin(EOF); return FdfTypes.CRLF; }
+}
+
+<WAITING_INCLUDE_PATH> {
+    {WHITE_SPACE}                    { return TokenType.WHITE_SPACE; }
+    {PATH_STRING}                    { yybegin(YYINITIAL); return FdfTypes.PATH_STRING; }
+    {CRLF}                           { yybegin(YYINITIAL); return FdfTypes.CRLF; }
     <<EOF>>                          { yybegin(EOF); return FdfTypes.CRLF; }
 }
 

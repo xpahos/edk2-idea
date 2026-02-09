@@ -60,10 +60,29 @@
     INF="INF"
     FILE="FILE"
     SECTION="SECTION"
+    SET="SET"
+    MINUS="-"
+    DIV="/"
+    MOD="%"
+    BIT_AND="&"
+    XOR="^"
+    BIT_NOT="~"
+    PLUS="+"
   ]
 }
 
-fdfFile ::= (fdfSection | directiveStatement | emptyLineOrComment)*
+fdfFile ::= (fdfSection | directiveStatement | headlessFdfStatement | emptyLineOrComment)*
+
+headlessFdfStatement ::= 
+    infStatement | 
+    fileStatement | 
+    aprioriBlock |
+    sectionStatement |
+    fdRegion | 
+    setStatement |
+    genericProperty CRLF
+
+genericProperty ::= key EQ (valueString | arrayBlock)
 
 // Directive
 directiveStatement ::= 
@@ -72,8 +91,10 @@ directiveStatement ::=
     elseStatement | 
     endifStatement |
     errorStatement
+    
+setStatement ::= SET key EQ valueString CRLF
 
-includeStatement ::= INCLUDE valueString CRLF
+includeStatement ::= INCLUDE path CRLF
 ifStatement ::= (IF | IFDEF | IFNDEF | ELSEIF) valueString CRLF
 elseStatement ::= ELSE CRLF
 endifStatement ::= ENDIF CRLF
@@ -108,37 +129,53 @@ unknownStatement ::= !sectionHeader regexLine CRLF
 regexLine ::= "[^\r\n]+" // Validation placeholder
 
 // Defines
-definesSection ::= DEFINES_SECTION_HEADER CRLF (defineStatement | directiveStatement | emptyLineOrComment)*
+definesSection ::= DEFINES_SECTION_HEADER CRLF (defineStatement | directiveStatement | emptyLineOrComment | setStatement)*
 defineStatement ::= defineEntry CRLF
 defineEntry ::= key EQ valueString
 
 // FD
-fdSection ::= FD_SECTION_HEADER CRLF (fdStatement | directiveStatement | emptyLineOrComment)*
+fdSection ::= FD_SECTION_HEADER CRLF (fdStatement | directiveStatement | emptyLineOrComment | setStatement)*
 fdStatement ::= (fdRegion | fdProperty) CRLF
-fdProperty ::= key EQ valueString
-fdRegion ::= (HEX_NUMBER | MACRO_REF) PIPE (HEX_NUMBER | MACRO_REF | IDENTIFIER) (CRLF)? (emptyLineOrComment)* (fdRegionBlock)?
+fdProperty ::= key EQ (valueString | arrayBlock)
+fdRegion ::= (HEX_NUMBER | MACRO_REF | IDENTIFIER | PATH_STRING) PIPE (HEX_NUMBER | MACRO_REF | IDENTIFIER | PATH_STRING) (CRLF)? (emptyLineOrComment)* (fdRegionBlock)?
 fdRegionBlock ::= "FV" EQ IDENTIFIER
 
 // FV
-fvSection ::= FV_SECTION_HEADER CRLF (fvStatement | directiveStatement | emptyLineOrComment)*
+fvSection ::= FV_SECTION_HEADER CRLF (fvStatement | directiveStatement | emptyLineOrComment | setStatement)*
 fvStatement ::= (fvProperty | aprioriBlock | infStatement | fileStatement | sectionStatement) CRLF
-fvProperty ::= key EQ valueString
+fvProperty ::= key EQ (valueString | arrayBlock)
 aprioriBlock ::= APRIORI IDENTIFIER LBRACE CRLF (infStatement | directiveStatement | emptyLineOrComment)* RBRACE
-infStatement ::= INF (valueString)* // 'INF' followed by path/options
-fileStatement ::= FILE (valueString)* LBRACE CRLF (sectionStatement | directiveStatement | emptyLineOrComment)* RBRACE
+infStatement ::= INF (infOption)* path CRLF
+infOption ::= key EQ restrictedValue
+private restrictedValue ::= IDENTIFIER | STRING | NUMBER | HEX_NUMBER | GUID | MACRO_REF | PATH_STRING
+
+// Array Block
+arrayBlock ::= LBRACE (arrayElement | directiveStatement | emptyLineOrComment)* RBRACE
+private arrayElement ::= (HEX_NUMBER | NUMBER | STRING | IDENTIFIER | arrayBlock | COMMA | valueString)
+
+sectionStatement ::= SECTION (valueString)* (LBRACE CRLF (sectionStatement | directiveStatement | emptyLineOrComment)* RBRACE)? CRLF
+
+fileStatement ::= FILE (valueString)* LBRACE CRLF (ruleStatement | directiveStatement | emptyLineOrComment)* RBRACE
+
+simpleFileSection ::= valueString CRLF
+fileProperty ::= key EQ (valueString | arrayBlock) CRLF {pin=2}
 
 // Rule
-ruleSection ::= RULE_SECTION_HEADER CRLF (ruleStatement | directiveStatement | emptyLineOrComment)*
-ruleStatement ::= (fileStatement | ruleProperty) CRLF
-ruleProperty ::= key EQ valueString 
+ruleSection ::= RULE_SECTION_HEADER CRLF (ruleStatement | directiveStatement | emptyLineOrComment | setStatement)*
+ruleStatement ::= (nestedFileStatement | ruleBlock | simpleFileSection | ruleProperty) CRLF?
+
+nestedFileStatement ::= fileStatement CRLF
+
+ruleBlock ::= (valueString)* LBRACE CRLF (ruleStatement | directiveStatement | emptyLineOrComment)* RBRACE
+ruleProperty ::= key EQ (valueString | arrayBlock)
 
 // Capsule ( Placeholder structure )
-capsuleSection ::= CAPSULE_SECTION_HEADER CRLF (capsuleStatement | directiveStatement | emptyLineOrComment)*
+capsuleSection ::= CAPSULE_SECTION_HEADER CRLF (capsuleStatement | directiveStatement | emptyLineOrComment | setStatement)*
 capsuleStatement ::= capsuleProperty CRLF
 capsuleProperty ::= key EQ valueString
 
 // OptionRom ( Placeholder structure )
-optionRomSection ::= OPTION_ROM_SECTION_HEADER CRLF (optionRomStatement | directiveStatement | emptyLineOrComment)*
+optionRomSection ::= OPTION_ROM_SECTION_HEADER CRLF (optionRomStatement | directiveStatement | emptyLineOrComment | setStatement)*
 optionRomStatement ::= optionRomProperty CRLF
 optionRomProperty ::= key EQ valueString
 
@@ -147,7 +184,11 @@ blockStatement ::= LBRACE CRLF (blockContent | emptyLineOrComment)* RBRACE
 blockContent ::= fdfSection | directiveStatement | key
 
 // Values
-valueString ::= (IDENTIFIER | NUMBER | STRING | DOT | COMMA | LBRACE | RBRACE | HEX_NUMBER | PATH_STRING | PIPE | MINUS | STAR | GUID | COLON | EQ | MACRO_REF | LPAREN | RPAREN | EQ_EQ | NE | LE | GE | AND_OP | OR_OP | APRIORI | INF | FILE | SECTION)+
+valueString ::= (IDENTIFIER | NUMBER | STRING | DOT | COMMA | HEX_NUMBER | PATH_STRING | PIPE | MINUS | PLUS | STAR | DIV | MOD | BIT_AND | XOR | BIT_NOT | GUID | COLON | EQ | MACRO_REF | LPAREN | RPAREN | EQ_EQ | NE | LE | GE | AND_OP | OR_OP | APRIORI | INF | FILE | SECTION | SET)+
+
+path ::= (PATH_STRING | IDENTIFIER) {
+  mixin="org.tianocore.edk2idea.Fdf.psi.impl.FdfPathMixin"
+}
 
 key ::= key_part+
 private key_part ::= IDENTIFIER | PATH_STRING | NUMBER | HEX_NUMBER | STAR | MINUS | DOT

@@ -183,3 +183,14 @@ tasks.register<GenerateLexerTask>("generateUniLexer") {
     sourceFile.set(File("src/main/java/org/tianocore/edk2idea/Uni/Uni.flex"))
     targetOutputDir.set(File("src/main/gen/org/tianocore/edk2idea/Uni"))
 }
+
+tasks.register<JavaExec>("validateParsers") {
+    group = "verification"
+    description = "Validates plugin parsers against an EDK2 repository."
+    classpath = sourceSets["test"].runtimeClasspath
+    mainClass.set("org.tianocore.edk2idea.RepoParserValidator")
+
+    if (project.hasProperty("edk2Path")) {
+        args(project.property("edk2Path"))
+    }
+}

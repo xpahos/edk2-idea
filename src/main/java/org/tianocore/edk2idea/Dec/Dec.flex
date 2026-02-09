@@ -40,6 +40,12 @@ KEY_CHARACTER=[^:= \n\r\t\f\\] | "\\ "
   "="                                                       { return DecTypes.EQ; }
   "|"                                                       { return DecTypes.PIPE; }
 
+  "/"                                                       { return DecTypes.SLASH; }
+  "\\"                                                      { return DecTypes.BACKSLASH; }
+  "<"                                                       { return DecTypes.LT; }
+  ">"                                                       { return DecTypes.GT; }
+  "-"                                                       { return DecTypes.MINUS; }
+
   "TRUE" | "FALSE" | "true" | "false"                       { return DecTypes.BOOL_VAL; }
   0[xX][0-9a-fA-F]+                                         { return DecTypes.HEX_VAL; }
   [0-9]+                                                    { return DecTypes.INT_VAL; }
@@ -47,7 +53,7 @@ KEY_CHARACTER=[^:= \n\r\t\f\\] | "\\ "
 
   [a-zA-Z0-9_]+                                             { return DecTypes.WORD; }
   
-  {CRLF}+                                                   { return TokenType.WHITE_SPACE; }
+  {CRLF}+                                                   { return DecTypes.CRLF; }
   {WHITE_SPACE}+                                            { return TokenType.WHITE_SPACE; }
 }
 

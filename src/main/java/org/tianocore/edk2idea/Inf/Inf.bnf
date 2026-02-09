@@ -11,6 +11,7 @@
   elementTypeHolderClass="org.tianocore.edk2idea.Inf.InfTypes"
   elementTypeClass="org.tianocore.edk2idea.Inf.psi.InfElementType"
   tokenTypeClass="org.tianocore.edk2idea.Inf.psi.InfTokenType"
+  psiImplUtilClass="org.tianocore.edk2idea.Inf.psi.impl.InfPsiImplUtil"
   tokens=[
     STAR
     MINUS
@@ -24,6 +25,12 @@
     DEPEX_SOR
     DEPEX_PUSH
     DEPEX_END
+    PATH_STRING
+    DEFINE_VALUE
+    NOT
+    AND
+    OR
+    BOOLEAN_VALUE
   ]
 }
 
@@ -44,8 +51,8 @@ defineEntry ::=
     | BASE_NAME EQUALS ( BASE_NAME_STRING | IDENTIFIER )
     | FILE_GUID EQUALS GUID
     | MODULE_TYPE EQUALS MODULE_TYPE_VALUE
-    | UEFI_SPECIFICATION_VERSION EQUALS HEX_NUMBER
-    | PI_SPECIFICATION_VERSION EQUALS HEX_NUMBER
+    | UEFI_SPECIFICATION_VERSION EQUALS ( HEX_NUMBER | VERSION_NUMBER )
+    | PI_SPECIFICATION_VERSION EQUALS ( HEX_NUMBER | VERSION_NUMBER )
     | LIBRARY_CLASS EQUALS definesLibraryClassValue*
     | BUILD_NUMBER EQUALS HEX_NUMBER
     | VERSION_STRING EQUALS VERSION_NUMBER
@@ -59,14 +66,18 @@ defineEntry ::=
     | PCI_VENDOR_ID EQUALS NUMBER
     | PCI_CLASS_CODE EQUALS NUMBER
     | PCI_COMPRESS EQUALS BOOLEAN_VALUE
-    | CUSTOM_MAKEFILE EQUALS (COMPILER_TYPE PIPE)? PATH_STRING
-    | DPX_SOURCE EQUALS PATH_STRING
+    | CUSTOM_MAKEFILE EQUALS (COMPILER_TYPE PIPE)? path
+    | DPX_SOURCE EQUALS path
     | SPEC EQUALS IDENTIFIER EQUALS VERSION_NUMBER
     | UEFI_HII_RESOURCE_SECTION EQUALS BOOLEAN_VALUE
-    | MODULE_UNI_FILE EQUALS PATH_STRING
-    | DEFINE IDENTIFIER EQUALS IDENTIFIER
-    | EDK_RELEASE_VERSION EQUALS HEX_NUMBER ) { pin=2 recoverWhile=defineRecovery }
+    | MODULE_UNI_FILE EQUALS path
+    | DEFINE IDENTIFIER EQUALS defineValue
+    | EDK_RELEASE_VERSION EQUALS HEX_NUMBER
+    | EFI_SPECIFICATION_VERSION EQUALS HEX_NUMBER
+    | VALID_ARCHITECTURES EQUALS validArchitectureList ) { pin=2 recoverWhile=defineRecovery }
 private definesLibraryClassValue ::= IDENTIFIER ( PIPE MODULE_TYPE_VALUE+ )?
+private validArchitectureList ::= IDENTIFIER*
+private defineValue ::= DEFINE_VALUE?
 
 // Other sections
 otherSections ::= (
@@ -89,7 +100,11 @@ unknownSection ::= UNKNOWN_SECTION_HEADER CRLF
 // Sources section
 sourcesSection ::= SOURCES_SECTION_HEADER COMMENT? CRLF (sourceStatement | emptyLineOrComment)*
 sourceStatement ::= sourceEntry COMMENT? CRLF
-sourceEntry ::= (PATH_STRING | BASE_NAME_STRING)+
+sourceEntry ::= path+ (PIPE identifierValue (PIPE featureFlagExpression)?)?
+
+path ::= (PATH_STRING | BASE_NAME_STRING | IDENTIFIER) {
+  mixin="org.tianocore.edk2idea.Inf.psi.impl.InfPathMixin"
+}
 
 // Packages section
 packagesSection ::= PACKAGES_SECTION_HEADER CRLF (packageStatement | emptyLineOrComment)*
@@ -134,7 +149,7 @@ depexSpecialOp ::= DEPEX_BEFORE identifierValue | DEPEX_AFTER identifierValue | 
 // Binaries section
 binariesSection ::= BINARIES_SECTION_HEADER CRLF (binaryStatement | emptyLineOrComment)*
 binaryStatement ::= binaryEntry CRLF | COMMENT CRLF
-binaryEntry ::= BINARY_TYPE PIPE filenameValue binaryOptions?
+binaryEntry ::= BINARY_TYPE PIPE path binaryOptions?
 binaryOptions ::= (PIPE (IDENTIFIER | STAR))? (PIPE (IDENTIFIER | STAR))? (PIPE (tagName | STAR))? (PIPE featureFlagExpression)?
 
 // BuildOptions section
@@ -143,7 +158,7 @@ buildOptionStatement ::= buildOptionEntry CRLF | asBuiltComment CRLF | macroDefi
 buildOptionEntry ::= toolSpec buildOperator buildFlags
 toolSpec ::= IDENTIFIER
 buildOperator ::= EQUALS | DOUBLE_EQUALS
-buildFlags ::= (MINUS | PATH_STRING | IDENTIFIER | STRING | STAR | EQUALS)+
+buildFlags ::= (MINUS | PATH_STRING | IDENTIFIER | STRING | STAR | EQUALS)*
 
 // UserExtensions section
 userExtensionsSection ::= USER_EXTENSIONS_SECTION_HEADER CRLF (userExtensionStatement | emptyLineOrComment)*
@@ -152,12 +167,14 @@ userExtensionContent ::= filenameValue | identifierValue | STRING
 
 // Common value types
 guidValue ::= GUID
-numberValue ::= NUMBER | HEX_NUMBER
-filenameValue ::= FILENAME | STRING | IDENTIFIER | BASE_NAME_STRING | PATH_STRING
-identifierValue ::= IDENTIFIER
+numberValue ::= NUMBER | HEX_NUMBER | VERSION_NUMBER
+filenameValue ::= FILENAME | STRING | path
+identifierValue ::= IDENTIFIER | NOT | AND | OR
 macroValue ::= identifierValue | filenameValue | STRING
 pcdDefaultValue ::= numberValue | STRING | BOOLEAN_VALUE
-featureFlagExpression ::= BOOLEAN_VALUE | identifierValue
+featureFlagExpression ::= featureFlagTerm ( (AND | OR) featureFlagTerm )*
+private featureFlagTerm ::= NOT? featureFlagAtom
+private featureFlagAtom ::= LPAREN featureFlagExpression RPAREN | BOOLEAN_VALUE | pcdName | identifierValue | NUMBER | HEX_NUMBER
 
 // Tool chain related
 tagName ::= IDENTIFIER

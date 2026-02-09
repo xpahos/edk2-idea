@@ -31,6 +31,7 @@ NUMBER = [0-9]+
 GUID = [0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}
 
 %state WAITING_VALUE
+%state WAITING_INCLUDE_PATH
 %state EOF
 
 %%
@@ -48,7 +49,7 @@ GUID = [0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{1
     \[Strings(\.[a-zA-Z0-9_]+)?\]         { return DscTypes.STRINGS_SECTION_HEADER; }
     
     // Directives
-    "!include"                       { return DscTypes.INCLUDE; }
+    "!include"                       { yybegin(WAITING_INCLUDE_PATH); return DscTypes.INCLUDE; }
     "!ifdef"                         { return DscTypes.IFDEF; }
     "!ifndef"                        { return DscTypes.IFNDEF; }
     "!if"                            { return DscTypes.IF; }
@@ -56,6 +57,10 @@ GUID = [0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{1
     "!else"                          { return DscTypes.ELSE; }
     "!endif"                         { return DscTypes.ENDIF; }
     "!error"                         { return DscTypes.ERROR; }
+    
+    "FLASH_DEFINITION"               { return DscTypes.FLASH_DEFINITION; }
+    "EXEC"                           { return DscTypes.EXEC; }
+    "Defines"                        { return DscTypes.DEFINES; }
 
     // Keywords (Generic)
     "TRUE"                           { return DscTypes.IDENTIFIER; }
@@ -84,6 +89,7 @@ GUID = [0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{1
     ">="                             { return DscTypes.GE; }
     "&&"                             { return DscTypes.AND; }
     "||"                             { return DscTypes.OR; }
+    "+"                              { return DscTypes.PLUS; }
 
     // Values
     {GUID}                           { return DscTypes.GUID; }
@@ -100,6 +106,13 @@ GUID = [0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{1
     {WHITE_SPACE}                    { return TokenType.WHITE_SPACE; }
     {HASH_COMMENT}                   { return DscTypes.COMMENT; }
     
+    <<EOF>>                          { yybegin(EOF); return DscTypes.CRLF; }
+}
+
+<WAITING_INCLUDE_PATH> {
+    {WHITE_SPACE}                    { return TokenType.WHITE_SPACE; }
+    {PATH_STRING}                    { yybegin(YYINITIAL); return DscTypes.PATH_STRING; }
+    {CRLF}                           { yybegin(YYINITIAL); return DscTypes.CRLF; }
     <<EOF>>                          { yybegin(EOF); return DscTypes.CRLF; }
 }
 

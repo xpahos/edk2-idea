@@ -11,9 +11,18 @@
   elementTypeHolderClass="org.tianocore.edk2idea.Uni.psi.UniTypes"
   elementTypeClass="org.tianocore.edk2idea.Uni.psi.UniElementType"
   tokenTypeClass="org.tianocore.edk2idea.Uni.psi.UniTokenType"
+  tokens=[
+    SLASH
+    EQUALS
+    SHARP
+    LANGDEF_KEYWORD
+  ]
 }
 
-uniFile ::= (stringEntry | property | COMMENT)*
+uniFile ::= header? (languageDefinition | stringEntry | property | COMMENT)*
+header ::= SLASH EQUALS SHARP
+
+languageDefinition ::= LANGDEF_KEYWORD languageName stringValues
 
 stringEntry ::= STRING_KEYWORD stringName languageEntry*
 
@@ -25,4 +34,4 @@ languageName ::= WORD
 
 stringValues ::= STRING_LITERAL+
 
-property ::= WORD
+property ::= (WORD | SHARP WORD?) (WORD | STRING_LITERAL)*

@@ -24,6 +24,10 @@
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
+        <psi.referenceContributor language="EDK2 Information Module" implementation="org.tianocore.edk2idea.Edk2ReferenceContributor"/>
+        <psi.referenceContributor language="EDK2 Description Module" implementation="org.tianocore.edk2idea.Edk2ReferenceContributor"/>
+        <psi.referenceContributor language="EDK2 Flash Description File" implementation="org.tianocore.edk2idea.Edk2ReferenceContributor"/>
+
         <fileType
                 name="EDK2 Inf File"
                 implementationClass="org.tianocore.edk2idea.Inf.InfFileType"
@@ -31,17 +35,19 @@
                 language="EDK2 Information Module"
                 extensions="inf"/>
         <fileType
-                name="EDK2 Dsc File"
+                name="EDK2 DSC File"
                 implementationClass="org.tianocore.edk2idea.Dsc.DscFileType"
                 fieldName="INSTANCE"
                 language="EDK2 Description Module"
-                extensions="dsc"/>
+                extensions="dsc"
+                patterns="*.dsc.inc"/>
         <fileType
-                name="EDK2 Fdf File"
+                name="EDK2 FDF File"
                 implementationClass="org.tianocore.edk2idea.Fdf.FdfFileType"
                 fieldName="INSTANCE"
                 language="EDK2 Flash Description File"
-                extensions="fdf"/>
+                extensions="fdf"
+                patterns="*.fdf.inc"/>
         <fileType
                 name="EDK2 Dec File"
                 implementationClass="org.tianocore.edk2idea.Dec.DecFileType"

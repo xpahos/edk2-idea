@@ -34,6 +34,12 @@
       SECTION_NAME="regexp:[a-zA-Z0-9_.]+"
       WORD="regexp:[^\[\]=\s|{},]+"
       STRING="regexp:\"[^\"]*\""
+      PATH_STRING="regexp:[a-zA-Z0-9_\-\.\/\\\$]+"
+      
+      SLASH="/"
+      BACKSLASH="\"
+      LT="<"
+      GT=">"
   ]
 }
 
@@ -59,50 +65,64 @@ private emptyLineOrComment ::= CRLF | COMMENT | WHITE_SPACE
 definesSection ::= LBRACKET "Defines" RBRACKET CRLF* (property | emptyLineOrComment)*
 
 // [Includes]
-includesSection ::= LBRACKET "Includes" sectionModifiers? RBRACKET CRLF* (includePath | emptyLineOrComment)*
+includesHeader ::= "Includes" sectionModifiers?
+includesSection ::= LBRACKET includesHeader (COMMA includesHeader)* RBRACKET CRLF* (includePath | emptyLineOrComment)*
 includePath ::= path {methods=[getPath]}
 
 // [LibraryClasses]
-libraryClassesSection ::= LBRACKET "LibraryClasses" sectionModifiers? RBRACKET CRLF* (libraryClassEntry | emptyLineOrComment)*
+libraryClassesHeader ::= "LibraryClasses" sectionModifiers?
+libraryClassesSection ::= LBRACKET libraryClassesHeader (COMMA libraryClassesHeader)* RBRACKET CRLF* (libraryClassEntry | emptyLineOrComment)*
 libraryClassEntry ::= libraryClassName PIPE libraryPath {methods=[getName getPath]}
 
 // [Guids], [Protocols], [Ppis]
-guidsSection ::= LBRACKET "Guids" sectionModifiers? RBRACKET CRLF* (guidEntry | emptyLineOrComment)*
-protocolsSection ::= LBRACKET "Protocols" sectionModifiers? RBRACKET CRLF* (guidEntry | emptyLineOrComment)*
-ppisSection ::= LBRACKET "Ppis" sectionModifiers? RBRACKET CRLF* (guidEntry | emptyLineOrComment)*
+guidsHeader ::= "Guids" sectionModifiers?
+guidsSection ::= LBRACKET guidsHeader (COMMA guidsHeader)* RBRACKET CRLF* (guidEntry | emptyLineOrComment)*
+
+protocolsHeader ::= "Protocols" sectionModifiers?
+protocolsSection ::= LBRACKET protocolsHeader (COMMA protocolsHeader)* RBRACKET CRLF* (guidEntry | emptyLineOrComment)*
+
+ppisHeader ::= "Ppis" sectionModifiers?
+ppisSection ::= LBRACKET ppisHeader (COMMA ppisHeader)* RBRACKET CRLF* (guidEntry | emptyLineOrComment)*
 
 guidEntry ::= guidName EQ guidValue {methods=[getName getValue]}
 
 // [Pcds...]
-pcdsSection ::= LBRACKET pcdSectionType sectionModifiers? RBRACKET CRLF* (pcdEntry | emptyLineOrComment)*
+pcdsHeader ::= pcdSectionType sectionModifiers?
+pcdsSection ::= LBRACKET pcdsHeader (COMMA pcdsHeader)* RBRACKET CRLF* (pcdEntry | emptyLineOrComment)*
 pcdSectionType ::= "PcdsFixedAtBuild" | "PcdsPatchableInModule" | "PcdsFeatureFlag" | "PcdsDynamic" | "PcdsDynamicEx" | "PcdsDynamicHii" | "PcdsDynamicVpd"
-pcdEntry ::= pcdName PIPE pcdValue PIPE pcdType PIPE pcdToken {methods=[getName getValue getType getToken]}
+pcdEntry ::= pcdName PIPE pcdValue PIPE pcdType PIPE pcdToken pcdConfiguration? {methods=[getName getValue getType getToken]}
 
 // [UserExtensions]
-userExtensionsSection ::= LBRACKET "UserExtensions" sectionModifiers? RBRACKET CRLF* (userExtensionContent | emptyLineOrComment)*
-userExtensionContent ::= WORD | STRING | property
+userExtensionsHeader ::= "UserExtensions" sectionModifiers?
+userExtensionsSection ::= LBRACKET userExtensionsHeader (COMMA userExtensionsHeader)* RBRACKET CRLF* (userExtensionContent | emptyLineOrComment)*
+userExtensionContent ::= (WORD | STRING | DOT | SLASH | BACKSLASH | MINUS | EQ | PIPE | COMMA | LBRACE | RBRACE | HEX_VAL | INT_VAL | BOOL_VAL | LPAREN | RPAREN)+
 
 // Generic fallback
-genericSection ::= LBRACKET SECTION_NAME RBRACKET CRLF* (genericEntry | emptyLineOrComment)*
+genericHeader ::= WORD sectionModifiers?
+genericSection ::= LBRACKET genericHeader (COMMA genericHeader)* RBRACKET CRLF* (genericEntry | emptyLineOrComment)*
 genericEntry ::= (WORD | EQ | PIPE | COMMA | LBRACE | RBRACE | HEX_VAL | INT_VAL | BOOL_VAL)+
 
 // Common elements
-sectionModifiers ::= (DOT SECTION_NAME)+ (COMMA (DOT SECTION_NAME)+)*
+sectionModifiers ::= (DOT (WORD | STRING))+ (COMMA (DOT (WORD | STRING))+)*
 
 key ::= WORD
-value ::= (WORD | STRING | HEX_VAL | INT_VAL | BOOL_VAL)+
+value ::= (WORD | STRING | HEX_VAL | INT_VAL | BOOL_VAL | DOT | MINUS | SLASH | BACKSLASH)+
 
 libraryClassName ::= WORD
 libraryPath ::= path
 
 guidName ::= WORD
 guidValue ::= LBRACE guidStructure RBRACE
-guidStructure ::= (HEX_VAL COMMA?)+ (LBRACE (HEX_VAL COMMA?)+ RBRACE)?
+guidStructure ::= ((HEX_VAL | INT_VAL) COMMA?)+ (LBRACE ((HEX_VAL | INT_VAL) COMMA?)+ RBRACE)?
 
-pcdName ::= WORD
-pcdValue ::= WORD | STRING | HEX_VAL | INT_VAL | BOOL_VAL
-pcdType ::= "BOOLEAN" | "UINT8" | "UINT16" | "UINT32" | "UINT64" | "VOID*"
-pcdToken ::= HEX_VAL
+pcdName ::= WORD (DOT WORD)*
+pcdValue ::= (WORD? STRING) | pcdName | HEX_VAL | INT_VAL | BOOL_VAL | guidValue
+pcdType ::= "BOOLEAN" | "UINT8" | "UINT16" | "UINT32" | "UINT64" | "VOID*" | WORD
+pcdToken ::= HEX_VAL | INT_VAL
 
-path ::= (WORD | "/") +
+pcdConfiguration ::= LBRACE (LT | GT | WORD | SLASH | DOT | MINUS | HEX_VAL | INT_VAL | LPAREN | RPAREN | WHITE_SPACE | CRLF)* RBRACE
+
+path ::= (WORD | SLASH | DOT | BACKSLASH | MINUS) + {
+  mixin="org.tianocore.edk2idea.Dec.psi.impl.DecPathMixin"
+}
 
