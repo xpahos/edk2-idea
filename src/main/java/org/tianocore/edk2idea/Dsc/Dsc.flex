@@ -39,14 +39,14 @@ GUID = [0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{1
 <YYINITIAL> {
     // Section Headers
     \[Defines(\.[a-zA-Z0-9_]+)?\]         { return DscTypes.DEFINES_SECTION_HEADER; }
-    \[Packages(\.[a-zA-Z0-9_]+)?\]        { return DscTypes.PACKAGES_SECTION_HEADER; }
-    \[LibraryClasses(\.[a-zA-Z0-9_\., ]+)?\]  { return DscTypes.LIBRARY_CLASSES_SECTION_HEADER; }
-    \[Pcds[a-zA-Z0-9_]*(\.[a-zA-Z0-9_\., ]+)?\]  { return DscTypes.PCD_SECTION_HEADER; }
-    \[BuildOptions(\.[a-zA-Z0-9_\., ]+)?\]    { return DscTypes.BUILD_OPTIONS_SECTION_HEADER; }
-    \[SkuIds(\.[a-zA-Z0-9_]+)?\]          { return DscTypes.SKU_IDS_SECTION_HEADER; }
-    \[Components(\.[a-zA-Z0-9_\., ]+)?\]      { return DscTypes.COMPONENTS_SECTION_HEADER; }
-    \[DefaultStores(\.[a-zA-Z0-9_]+)?\]   { return DscTypes.DEFAULT_STORES_SECTION_HEADER; }
-    \[Strings(\.[a-zA-Z0-9_]+)?\]         { return DscTypes.STRINGS_SECTION_HEADER; }
+    \[Packages(\.[a-zA-Z0-9_\$\(\)]+)?\]        { return DscTypes.PACKAGES_SECTION_HEADER; }
+    \[LibraryClasses(\.[a-zA-Z0-9_\., \$\(\)]+)?\]  { return DscTypes.LIBRARY_CLASSES_SECTION_HEADER; }
+    \[Pcds[a-zA-Z0-9_]*(\.[a-zA-Z0-9_\., \$\(\)]+)?\]  { return DscTypes.PCD_SECTION_HEADER; }
+    \[BuildOptions(\.[a-zA-Z0-9_\., \$\(\)]+)?\]    { return DscTypes.BUILD_OPTIONS_SECTION_HEADER; }
+    \[SkuIds(\.[a-zA-Z0-9_\$\(\)]+)?\]          { return DscTypes.SKU_IDS_SECTION_HEADER; }
+    \[Components(\.[a-zA-Z0-9_\., \$\(\)]+)?\]      { return DscTypes.COMPONENTS_SECTION_HEADER; }
+    \[DefaultStores(\.[a-zA-Z0-9_\$\(\)]+)?\]   { return DscTypes.DEFAULT_STORES_SECTION_HEADER; }
+    \[Strings(\.[a-zA-Z0-9_\$\(\)]+)?\]         { return DscTypes.STRINGS_SECTION_HEADER; }
     
     // Directives
     "!include"                       { yybegin(WAITING_INCLUDE_PATH); return DscTypes.INCLUDE; }

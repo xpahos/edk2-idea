@@ -1,0 +1,12 @@
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = BinariesTest
+  FILE_GUID                      = 5a9e7754-d81b-49ea-85ad-69eaa7b1539b
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+
+[Binaries]
+  # Type | File | Target | Ver | UI | Tag | Flag
+  PE32 | MyApp.efi | * | * | * | * | TRUE
+  # Type | File | | | | | Flag (Empty fields)
+  PE32 | MyApp.efi | | | | | TRUE

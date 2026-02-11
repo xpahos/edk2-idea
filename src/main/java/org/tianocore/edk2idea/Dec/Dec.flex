@@ -55,6 +55,8 @@ KEY_CHARACTER=[^:= \n\r\t\f\\] | "\\ "
   
   {CRLF}+                                                   { return DecTypes.CRLF; }
   {WHITE_SPACE}+                                            { return TokenType.WHITE_SPACE; }
+
+  \$\([a-zA-Z0-9_\.]+\)                                     { return DecTypes.MACRO_REF; }
 }
 
 [^]                                                         { return TokenType.BAD_CHARACTER; }

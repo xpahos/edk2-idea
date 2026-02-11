@@ -1,0 +1,14 @@
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = MipiSysTLib
+  FILE_GUID                      = 5a9e7754-d81b-49ea-85ad-69eaa7b1539b
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = MipiSysTLib
+
+[Sources]
+  MipiSysTLib.c
+  mipi_syst.h
+  Platform.c
+  Platform.h
+  $(MIPI_HEADER_PATH)/api.h

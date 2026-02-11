@@ -31,6 +31,7 @@
     AND
     OR
     BOOLEAN_VALUE
+    MACRO_REF
   ]
 }
 
@@ -100,9 +101,12 @@ unknownSection ::= UNKNOWN_SECTION_HEADER CRLF
 // Sources section
 sourcesSection ::= SOURCES_SECTION_HEADER COMMENT? CRLF (sourceStatement | emptyLineOrComment)*
 sourceStatement ::= sourceEntry COMMENT? CRLF
-sourceEntry ::= path+ (PIPE identifierValue (PIPE featureFlagExpression)?)?
+sourceEntry ::= path (PIPE sourceFamily? (PIPE sourceTagName? (PIPE sourceToolCode? (PIPE featureFlagExpression?)?)?)?)?
+sourceFamily ::= identifierValue | path
+sourceTagName ::= identifierValue | path
+sourceToolCode ::= identifierValue | path
 
-path ::= (PATH_STRING | BASE_NAME_STRING | IDENTIFIER) {
+path ::= (PATH_STRING | BASE_NAME_STRING | IDENTIFIER | MACRO_REF)+ {
   mixin="org.tianocore.edk2idea.Inf.psi.impl.InfPathMixin"
 }
 
@@ -141,7 +145,8 @@ pcdName ::= IDENTIFIER DOT IDENTIFIER | BASE_NAME_STRING
 // DEPEX section
 depexSection ::= DEPEX_SECTION_HEADER depexExpression?
 depexExpression ::= depexTerm (depexOperator depexTerm)*
-depexTerm ::= identifierValue | BOOLEAN_VALUE | guidValue | LPAREN depexExpression RPAREN | depexUnaryOp depexTerm | depexSpecialOp
+depexTerm ::= depexIdentifier | BASE_NAME_STRING | MACRO_REF | BOOLEAN_VALUE | guidValue | LPAREN depexExpression RPAREN | depexUnaryOp depexTerm | depexSpecialOp
+private depexIdentifier ::= IDENTIFIER (DOT IDENTIFIER)?
 depexOperator ::= DEPEX_AND | DEPEX_OR
 depexUnaryOp ::= DEPEX_NOT
 depexSpecialOp ::= DEPEX_BEFORE identifierValue | DEPEX_AFTER identifierValue | DEPEX_SOR | DEPEX_PUSH guidValue | DEPEX_END
@@ -150,7 +155,7 @@ depexSpecialOp ::= DEPEX_BEFORE identifierValue | DEPEX_AFTER identifierValue | 
 binariesSection ::= BINARIES_SECTION_HEADER CRLF (binaryStatement | emptyLineOrComment)*
 binaryStatement ::= binaryEntry CRLF | COMMENT CRLF
 binaryEntry ::= BINARY_TYPE PIPE path binaryOptions?
-binaryOptions ::= (PIPE (IDENTIFIER | STAR))? (PIPE (IDENTIFIER | STAR))? (PIPE (tagName | STAR))? (PIPE featureFlagExpression)?
+binaryOptions ::= (PIPE (IDENTIFIER | STAR)?)? (PIPE (IDENTIFIER | STAR)?)? (PIPE (IDENTIFIER | STAR)?)? (PIPE (tagName | STAR)?)? (PIPE featureFlagExpression?)?
 
 // BuildOptions section
 buildOptionsSection ::= BUILD_OPTIONS_SECTION_HEADER CRLF (buildOptionStatement | emptyLineOrComment)*

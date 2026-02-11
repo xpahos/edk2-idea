@@ -80,6 +80,18 @@ public class InfParserTest extends ParsingTestCase {
         doTest(true);
     }
 
+    public void testSourcesWithMacros() {
+        doTest(true);
+    }
+
+    public void testSourcesWithFullOptions() {
+        doTest(true);
+    }
+
+    public void testBinariesWithFullOptions() {
+        doTest(true);
+    }
+
     @Override
     protected String getTestDataPath() {
         return "src/test/resources/InfParserGolden";
@@ -96,31 +108,22 @@ public class InfParserTest extends ParsingTestCase {
         }
         if (checkResult) {
             try {
-                checkResult(getTestName(false), myFile);
-            } catch (Throwable e) {
-                System.out.println("###### EXCEPTION " + getName() + " ######");
-                e.printStackTrace(System.out);
-                System.out.println("Message: " + e.getMessage());
-                try {
-                    java.lang.reflect.Method getExpected = e.getClass().getMethod("getExpected");
-                    java.lang.reflect.Method getActual = e.getClass().getMethod("getActual");
-                    System.out.println("Reflection Expected: " + getExpected.invoke(e));
-                    System.out.println("Reflection Actual: " + getActual.invoke(e));
-                } catch (Exception ex) {
-                    System.out.println("Reflection failed: " + ex);
-                    // Try fields
-                    try {
-                        java.lang.reflect.Field expectedF = e.getClass().getDeclaredField("expected");
-                        expectedF.setAccessible(true);
-                        System.out.println("Field Expected: " + expectedF.get(e));
-                        java.lang.reflect.Field actualF = e.getClass().getDeclaredField("actual");
-                        actualF.setAccessible(true);
-                        System.out.println("Field Actual: " + actualF.get(e));
-                    } catch (Exception ex2) {
-                        System.out.println("Field Reflection failed: " + ex2);
-                    }
+                String tree = com.intellij.psi.impl.DebugUtil.psiToString(myFile, false);
+                // Sanitize the tree output to remove unstable object IDs
+                tree = tree.replaceAll(" \\(java\\.lang\\.String@[a-f0-9]+\\)", "")
+                        .replaceAll(
+                                " \\(com\\.intellij\\.platform\\.testFramework\\.core\\.PresentableFileInfo@[a-f0-9]+\\)",
+                                "");
+
+                String expectedFilePath = getTestDataPath() + "/" + getTestName(false) + ".txt";
+
+                if (Boolean.getBoolean("idea.tests.overwrite")) {
+                    com.intellij.openapi.util.io.FileUtil.writeToFile(new java.io.File(expectedFilePath), tree);
+                    System.out.println("Overwrote golden file: " + expectedFilePath);
+                } else {
+                    assertSameLinesWithFile(expectedFilePath, tree);
                 }
-                System.out.println("###### EXCEPTION END ######");
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }

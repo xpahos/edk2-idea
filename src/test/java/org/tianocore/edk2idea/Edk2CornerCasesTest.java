@@ -665,4 +665,174 @@ public class Edk2CornerCasesTest extends BasePlatformTestCase {
         """);
     myFixture.checkHighlighting();
   }
+
+  public void testInfDoublePipeCrash() {
+    myFixture.configureByText("TestDoublePipe.inf",
+        """
+            [Defines]
+              INF_VERSION = 0x00010005
+              BASE_NAME = Test
+              FILE_GUID = 00000000-0000-0000-0000-000000000000
+              VERSION_STRING = 1.0
+              MODULE_TYPE = BASE
+            [Sources]
+              $(OPENSSL_GEN_PATH)/IA32-MSFT/crypto/aes/aes-586.nasm ||||gEfiCryptoPkgTokenSpaceGuid.PcdOpensslLibAssemblySourceStyleNasm
+            """);
+    myFixture.checkHighlighting();
+  }
+
+  public void testInfFeatureFlagKeywords() {
+    myFixture.configureByText("TestKeywords.inf", """
+        [Defines]
+          INF_VERSION = 0x00010005
+          BASE_NAME = Test
+          FILE_GUID = 00000000-0000-0000-0000-000000000000
+          VERSION_STRING = 1.0
+          MODULE_TYPE = BASE
+        [Sources]
+          File.c | | | | Token.Pcd1 AND Token.Pcd2
+          File2.c | | | | Token.Pcd1 OR Token.Pcd2
+          File3.c | | | | NOT Token.Pcd3
+        """);
+    myFixture.checkHighlighting();
+  }
+
+  public void testDscSectionWithMacro() {
+    myFixture.configureByText("TestMacroSection.dsc", """
+        [Defines]
+          PLATFORM_NAME = Test
+          PLATFORM_GUID = 00000000-0000-0000-0000-000000000000
+          PLATFORM_VERSION = 1.0
+          DSC_SPECIFICATION = 0x00010005
+          OUTPUT_DIRECTORY = Build/Test
+          SUPPORTED_ARCHITECTURES = IA32|X64
+          BUILD_TARGETS = DEBUG|RELEASE
+          SKUID_IDENTIFIER = DEFAULT
+
+        [Components.$(FSP_ARCH)]
+          }
+        """);
+    myFixture.checkHighlighting();
+  }
+
+  public void testDecSectionWithMacro() {
+    myFixture.configureByText("TestMacroSection.dec", """
+        [Defines]
+          DEC_SPECIFICATION              = 0x00010005
+          PACKAGE_NAME                   = TestPkg
+          PACKAGE_GUID                   = 00000000-0000-0000-0000-000000000000
+          PACKAGE_VERSION                = 1.0
+
+        [Includes.$(ARCH)]
+          Include
+        """);
+    myFixture.checkHighlighting();
+  }
+
+  public void testInfSectionWithMacro() {
+    myFixture.configureByText("TestMacroSection.inf", """
+        [Defines]
+          INF_VERSION = 0x00010005
+          BASE_NAME = Test
+          FILE_GUID = 00000000-0000-0000-0000-000000000000
+          VERSION_STRING = 1.0
+          MODULE_TYPE = BASE
+
+        [LibraryClasses.$(ARCH)]
+          DebugLib
+        """);
+    myFixture.checkHighlighting();
+  }
+
+  public void testDepexWithComment() {
+    myFixture.configureByText("TestDepexComment.inf", """
+        [Defines]
+          INF_VERSION = 0x00010005
+          BASE_NAME = Test
+          FILE_GUID = 00000000-0000-0000-0000-000000000000
+          VERSION_STRING = 1.0
+          MODULE_TYPE = DXE_DRIVER
+
+        [Depex]
+          TRUE # comment
+          AND FALSE
+        """);
+    myFixture.checkHighlighting();
+  }
+
+  public void testDepexMacro() {
+    myFixture.configureByText("TestDepexMacro.inf", """
+        [Defines]
+          INF_VERSION = 0x00010005
+          BASE_NAME = Test
+          FILE_GUID = 00000000-0000-0000-0000-000000000000
+          VERSION_STRING = 1.0
+          MODULE_TYPE = DXE_DRIVER
+
+        [Depex]
+          $(TEST_MACRO)
+        """);
+    myFixture.checkHighlighting();
+  }
+
+  public void testDepexPcd() {
+    myFixture.configureByText("TestDepexPcd.inf", """
+        [Defines]
+          INF_VERSION = 0x00010005
+          BASE_NAME = Test
+          FILE_GUID = 00000000-0000-0000-0000-000000000000
+          VERSION_STRING = 1.0
+          MODULE_TYPE = DXE_DRIVER
+
+        [Depex]
+          gEfiTokenSpaceGuid.PcdName
+        """);
+    myFixture.checkHighlighting();
+  }
+
+  public void testDepexIdentifier() {
+    myFixture.configureByText("DxeMpInitLibUpDepLib.inf", """
+        [Defines]
+          INF_VERSION                    = 0x00010005
+          BASE_NAME                      = DxeMpInitLibUpDepLib
+          FILE_GUID                      = 95FA4B7B-930E-4755-A9B7-10F0716DA374
+          MODULE_TYPE                    = BASE
+          VERSION_STRING                 = 1.0
+          LIBRARY_CLASS                  = NULL
+
+        [Depex]
+          gEfiMpInitLibUpDepProtocolGuid
+        """);
+    myFixture.checkHighlighting();
+  }
+
+  public void testDepexNoNewline() {
+    // Manually construct string without trailing newline
+    String content = "[Defines]\n" +
+        "  INF_VERSION = 0x00010005\n" +
+        "  BASE_NAME = Test\n" +
+        "  FILE_GUID = 00000000-0000-0000-0000-000000000000\n" +
+        "  VERSION_STRING = 1.0\n" +
+        "  MODULE_TYPE = DXE_DRIVER\n" +
+        "\n" +
+        "[Depex]\n" +
+        "  gEfiMpInitLibUpDepProtocolGuid";
+    myFixture.configureByText("TestDepexNoNewline.inf", content);
+    myFixture.checkHighlighting();
+  }
+
+  public void testDepexCarriageReturn() {
+    // Manually construct string with CR only
+    String content = "[Defines]\n" +
+        "  INF_VERSION = 0x00010005\n" +
+        "  BASE_NAME = Test\n" +
+        "  FILE_GUID = 00000000-0000-0000-0000-000000000000\n" +
+        "  VERSION_STRING = 1.0\n" +
+        "  MODULE_TYPE = DXE_DRIVER\n" +
+        "\n" +
+        "[Depex]\r" +
+        "  gEfiMpInitLibUpDepProtocolGuid\r";
+    myFixture.configureByText("TestDepexCR.inf", content);
+    myFixture.checkHighlighting();
+  }
 }

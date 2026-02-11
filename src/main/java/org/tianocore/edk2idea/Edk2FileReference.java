@@ -29,16 +29,23 @@ public class Edk2FileReference extends PsiReferenceBase<PsiElement> implements P
 
         // 1. Try to resolve relative to current file
         PsiFile currentFile = myElement.getContainingFile();
+
+        // 0. Macro Expansion
+        java.util.Map<String, String> macros = Edk2MacroResolver.getProjectMacros(project, currentFile);
+        String expandedPath = Edk2MacroResolver.expand(filePath, macros);
+
         if (currentFile != null) {
             PsiDirectory currentDir = currentFile.getContainingDirectory();
             if (currentDir != null) {
-                PsiFile relativeFile = currentDir.findFile(filePath);
+                // ... (standard findFile logic) ...
+
+                // Fallback using VirtualFile
+                VirtualFile dirVFile = currentDir.getVirtualFile();
+                PsiFile relativeFile = currentDir.findFile(expandedPath);
                 if (relativeFile != null) {
                     results.add(new PsiElementResolveResult(relativeFile));
                 } else {
-                    // Try resolving subdirectories if path contains separators
-                    // Simple hack: use VirtualFile findFileByRelativePath
-                    VirtualFile vFile = currentDir.getVirtualFile().findFileByRelativePath(filePath);
+                    VirtualFile vFile = dirVFile.findFileByRelativePath(expandedPath);
                     if (vFile != null) {
                         PsiFile psiFile = PsiManager.getInstance(project).findFile(vFile);
                         if (psiFile != null) {
@@ -54,40 +61,58 @@ public class Edk2FileReference extends PsiReferenceBase<PsiElement> implements P
             }
         }
 
-        // 2. Try to resolve by filename globally (fallback) if not found relatively?
-        // Or should we always do this?
-        // For EDK2, paths are often relative to the package root or workspace.
-        // If we can't find it relatively, let's try finding files with valid names.
-        // NOTE: This can be noisy. Let's limit to exact path suffix matching if
-        // possible.
-        // For now, let's stick to simple relative + maybe Project search if it's a
-        // "known" absolute-ish path.
-
-        // If results are empty, let's try to find any file with this name in the
-        // project
-        // This is useful for "Packages/MdePkg/MdePkg.dec" style paths where we might be
-        // at root.
         if (results.isEmpty()) {
-            // Extract just the filename
-            String filename = filePath;
-            if (filePath.contains("/")) {
-                filename = filePath.substring(filePath.lastIndexOf("/") + 1);
-            }
-            if (filePath.contains("\\")) {
-                filename = filePath.substring(filePath.lastIndexOf("\\") + 1);
+            // Fuzzy matching for unresolved macros
+            // Example: $(OPENSSL_PATH)/ms/uplink.h -> matches any file ending in
+            // /ms/uplink.h
+            if (expandedPath.contains("$(") && expandedPath.contains(")")) {
+                String suffix = expandedPath.substring(expandedPath.lastIndexOf(")") + 1).replace('\\', '/');
+                if (suffix.startsWith("/") || suffix.startsWith("\\")) {
+                    String filename = suffix.substring(suffix.lastIndexOf('/') + 1);
+                    Collection<VirtualFile> virtualFiles = FilenameIndex.getVirtualFilesByName(filename,
+                            GlobalSearchScope.allScope(project));
+
+                    for (VirtualFile virtualFile : virtualFiles) {
+                        String vPath = virtualFile.getPath(); // VirtualFile paths use / as separator
+                        if (vPath.endsWith(suffix)) {
+                            PsiFile psiFile = PsiManager.getInstance(project).findFile(virtualFile);
+                            if (psiFile != null) {
+                                results.add(new PsiElementResolveResult(psiFile));
+                            }
+                        }
+                    }
+                }
             }
 
-            Collection<VirtualFile> virtualFiles = FilenameIndex.getVirtualFilesByName(filename,
-                    GlobalSearchScope.allScope(project));
-            for (VirtualFile virtualFile : virtualFiles) {
-                // Simple check: does the path end with our filePath?
-                // Normalize separators
-                String vPath = virtualFile.getPath().replace('\\', '/');
-                String refPath = filePath.replace('\\', '/');
-                if (vPath.endsWith(refPath)) {
-                    PsiFile psiFile = PsiManager.getInstance(project).findFile(virtualFile);
-                    if (psiFile != null) {
-                        results.add(new PsiElementResolveResult(psiFile));
+            // Standard global search (fallback if fuzzy matching didn't return results, or
+            // just separate logic?)
+            // The original code had a global search block here, let's keep/merge it or
+            // ensure we don't duplicate.
+            // Original code logic:
+            if (results.isEmpty()) {
+                String filename = expandedPath;
+                if (expandedPath.contains("/")) {
+                    filename = expandedPath.substring(expandedPath.lastIndexOf("/") + 1);
+                }
+                if (expandedPath.contains("\\")) {
+                    filename = expandedPath.substring(expandedPath.lastIndexOf("\\") + 1);
+                }
+
+                Collection<VirtualFile> virtualFiles = FilenameIndex.getVirtualFilesByName(filename,
+                        GlobalSearchScope.allScope(project));
+                for (VirtualFile virtualFile : virtualFiles) {
+                    String vPath = virtualFile.getPath().replace('\\', '/');
+                    String refPath = expandedPath.replace('\\', '/');
+                    // Only match if refPath doesn't contain macros, otherwise we might match
+                    // standard files wrongly?
+                    // Actually original logic was: vPath.endsWith(refPath).
+                    // If refPath is "$(VAR)/file.h", endsWith check fails.
+                    // So we only need to preserve this for non-macro paths or fully resolved paths.
+                    if (!expandedPath.contains("$(") && vPath.endsWith(refPath)) {
+                        PsiFile psiFile = PsiManager.getInstance(project).findFile(virtualFile);
+                        if (psiFile != null) {
+                            results.add(new PsiElementResolveResult(psiFile));
+                        }
                     }
                 }
             }

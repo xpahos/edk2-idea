@@ -338,4 +338,87 @@ public class Edk2NavigationTest extends BasePlatformTestCase {
     com.intellij.psi.PsiReference ref = myFixture.getFile().findReferenceAt(offset);
     assertNotNull("Reference should exist for Logo.bmp", ref);
   }
+
+  public void testMacroNavigation() {
+    myFixture.addFileToProject("Platform/BaseLib.inf", "// BaseLib");
+    myFixture.configureByText("Test.dsc", """
+        [Defines]
+          DEFINE PLATFORM_DIR = Platform
+          SET OTHER_DIR = Platform
+
+        [LibraryClasses]
+          BaseLib|$(PLATFORM_DIR)/BaseLib<caret>.inf
+        """);
+
+    // Initial verification with DEFINE
+    PsiReference reference = myFixture.getReferenceAtCaretPosition();
+    assertNotNull("Reference not found", reference);
+    PsiElement target = reference.resolve();
+    assertNotNull("Target not found using DEFINE", target);
+    assertEquals("BaseLib.inf", ((PsiFile) target).getName());
+
+    // Verification with SET (Simulated by modifying text to use SET variable)
+    myFixture.configureByText("Test2.dsc", """
+        [Defines]
+          DEFINE PLATFORM_DIR = Platform
+          SET OTHER_DIR = Platform
+
+        [LibraryClasses]
+          BaseLib|$(OTHER_DIR)/BaseLib<caret>.inf
+        """);
+    reference = myFixture.getReferenceAtCaretPosition();
+    assertNotNull("Reference not found", reference);
+    target = reference.resolve();
+    assertNotNull("Target not found using SET", target);
+    assertEquals("BaseLib.inf", ((PsiFile) target).getName());
+  }
+
+  public void testInfMacroNavigation() {
+    myFixture.addFileToProject("Platform/Include/api.h", "// Header");
+    myFixture.configureByText("Test.dsc", """
+        [Defines]
+          DEFINE PLATFORM_DIR = Platform
+        """);
+    myFixture.configureByText("Test.inf", """
+        [Defines]
+          INF_VERSION = 0x00010005
+          BASE_NAME = Test
+          FILE_GUID = 12345678-1234-1234-1234-123456789012
+          MODULE_TYPE = BASE
+          VERSION_STRING = 1.0
+          LIBRARY_CLASS = TestLib
+
+        [Sources]
+          $(PLATFORM_DIR)/Include/api<caret>.h
+        """);
+
+    PsiReference reference = myFixture.getReferenceAtCaretPosition();
+    assertNotNull("Reference not found", reference);
+    PsiElement target = reference.resolve();
+    assertNotNull("Target not found", target);
+    assertEquals("api.h", ((PsiFile) target).getName());
+  }
+
+  public void testInfUndefinedMacroNavigation() {
+    myFixture.addFileToProject("Pkg/Include/Library/MissingMacroLib.h", "// Header");
+    // No DSC definition for UNKNOWN_PKG_DIR
+    myFixture.configureByText("Test.inf", """
+        [Defines]
+          INF_VERSION = 0x00010005
+          BASE_NAME = Test
+          FILE_GUID = 12345678-1234-1234-1234-123456789012
+          MODULE_TYPE = BASE
+          VERSION_STRING = 1.0
+          LIBRARY_CLASS = TestLib
+
+        [Sources]
+          $(UNKNOWN_PKG_DIR)/Include/Library/MissingMacroLib<caret>.h
+        """);
+
+    PsiReference reference = myFixture.getReferenceAtCaretPosition();
+    assertNotNull("Reference not found", reference);
+    PsiElement target = reference.resolve();
+    assertNotNull("Target not found (fuzzy matching failed)", target);
+    assertEquals("MissingMacroLib.h", ((PsiFile) target).getName());
+  }
 }

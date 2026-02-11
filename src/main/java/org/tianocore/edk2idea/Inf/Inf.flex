@@ -41,7 +41,7 @@ private void clearStack() {
 %}
 
 // Character classes
-CRLF = \r?\n
+CRLF = \r|\n|\r\n
 WHITE_SPACE = [ \t\f]+
 ALPHA = [a-zA-Z_]
 DIGIT = [0-9]
@@ -60,6 +60,9 @@ DECIMAL_NUMBER = {DIGIT}+
 
 // GUID format: 8-4-4-4-12 hex digits
 GUID = {HEX_DIGIT}{8}-{HEX_DIGIT}{4}-{HEX_DIGIT}{4}-{HEX_DIGIT}{4}-{HEX_DIGIT}{12}
+
+// Macros
+MACRO_REF = \$\([a-zA-Z0-9_]+\)
 
 // Strings
 STRING = L?\"([^\"\r\n]*)\"
@@ -102,7 +105,9 @@ HASH_COMMENT = #[^\r\n]*
     {GUID}                           { return InfTypes.GUID; }
     {HEX_NUMBER}                     { return InfTypes.HEX_NUMBER; }
     {VERSION_NUMBER}                 { return InfTypes.VERSION_NUMBER; }
+    {VERSION_NUMBER}                 { return InfTypes.VERSION_NUMBER; }
     {DECIMAL_NUMBER}                 { return InfTypes.NUMBER; }
+    {MACRO_REF}                      { return InfTypes.MACRO_REF; }
 
     // Section Headers
     \[Defines(\.[a-zA-Z0-9]+)?\]         { pushState(DEFINES_SECTION); return InfTypes.DEFINES_SECTION_HEADER; }
@@ -327,6 +332,7 @@ HASH_COMMENT = #[^\r\n]*
 
 <DEFINES_SECTION_WAITING_PATH_STRING> {
     {PATH_STRING}                    { popState(); return InfTypes.PATH_STRING; }
+    {MACRO_REF}                      { return InfTypes.MACRO_REF; }
     {WHITE_SPACE}                    { return TokenType.WHITE_SPACE; }
     <<EOF>>                          { clearStack(); yybegin(EOF); return InfTypes.CRLF; }
 }
@@ -360,6 +366,7 @@ HASH_COMMENT = #[^\r\n]*
     "GCC"                            { return InfTypes.COMPILER_TYPE; }
     "MSFT"                           { return InfTypes.COMPILER_TYPE; }
     {PATH_STRING}                    { popState(); return InfTypes.PATH_STRING; }
+    {MACRO_REF}                      { return InfTypes.MACRO_REF; }
     {WHITE_SPACE}                    { return TokenType.WHITE_SPACE; }
     <<EOF>>                          { clearStack(); yybegin(EOF); return InfTypes.CRLF; }
     <<EOF>>                          { clearStack(); yybegin(EOF); return InfTypes.CRLF; }
@@ -402,12 +409,24 @@ HASH_COMMENT = #[^\r\n]*
     "[" { yypushback(1); popState(); }
 
     "|"                              { return InfTypes.PIPE; }
+
+    // Feature Flags
+    "!"                              { return InfTypes.NOT; }
+    "NOT"                            { return InfTypes.NOT; }
+    "AND"                            { return InfTypes.AND; }
+    "OR"                             { return InfTypes.OR; }
+    "("                              { return InfTypes.LPAREN; }
+    ")"                              { return InfTypes.RPAREN; }
+    "TRUE"                           { return InfTypes.BOOLEAN_VALUE; }
+    "FALSE"                          { return InfTypes.BOOLEAN_VALUE; }
     {CRLF}                           { return InfTypes.CRLF; }
     {WHITE_SPACE}                    { return TokenType.WHITE_SPACE; }
     {HASH_COMMENT}                   { return InfTypes.COMMENT; }
 
     {IDENTIFIER}                     { return InfTypes.IDENTIFIER; }
+    {BASE_NAME_STRING}               { return InfTypes.BASE_NAME_STRING; }
     {PATH_STRING}                    { return InfTypes.PATH_STRING; }
+    {MACRO_REF}                      { return InfTypes.MACRO_REF; }
 
     <<EOF>>                          { clearStack(); yybegin(EOF); return InfTypes.CRLF; }
     [^]                              { return TokenType.BAD_CHARACTER; }
@@ -433,6 +452,8 @@ HASH_COMMENT = #[^\r\n]*
     {GUID}                           { return InfTypes.GUID; }
     "("                              { return InfTypes.LPAREN; }
     ")"                              { return InfTypes.RPAREN; }
+    "."                              { return InfTypes.DOT; }
+    {MACRO_REF}                      { return InfTypes.MACRO_REF; }
 
     {CRLF}                           { return TokenType.WHITE_SPACE; }
     {WHITE_SPACE}                    { return TokenType.WHITE_SPACE; }

@@ -14,5 +14,5 @@ DSC File
       DscDirectiveStatementImpl(DIRECTIVE_STATEMENT)
         DscIncludeStatementImpl(INCLUDE_STATEMENT)
           PsiElement(DscTokenType.!include)('!include')
-          DscValueStringImpl(VALUE_STRING)
+          DscPathImpl(PATH)
             PsiElement(DscTokenType.PATH_STRING)('MdePkg/MdeLibs.dsc.inc')

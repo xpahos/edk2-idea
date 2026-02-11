@@ -1,0 +1,20 @@
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = MipiSysTLib
+  FILE_GUID                      = 5a9e7754-d81b-49ea-85ad-69eaa7b1539b
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = MipiSysTLib
+
+[Sources]
+  MipiSysTLib.c
+  # File | Fam
+  mipi_syst.h | MSFT
+  # File | Fam | Tag
+  mipi_syst_gcc.h | GCC | MYTAG
+  # File | Fam | Tag | Tool
+  mipi_syst_intel.h | INTEL | MYTAG | MYTOOL
+  # File | Fam | Tag | Tool | Flag
+  mipi_syst_full.h | MSFT | MYTAG | MYTOOL | !PcdFlag
+  # Empty fields (5 fields total) - Must use spaces to avoid || token (OR operator)
+  $(OPENSSL_GEN_PATH)/X64-GCC/crypto/sha/sha512-x86_64.s | | | | !gEfiCryptoPkgTokenSpaceGuid.PcdOpensslLibAssemblySourceStyleNasm

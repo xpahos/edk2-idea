@@ -111,6 +111,7 @@ tasks {
             showStandardStreams = true
             exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
         }
+        systemProperty("idea.tests.overwrite", System.getProperty("idea.tests.overwrite", "false"))
     }
 }
 

@@ -40,6 +40,7 @@
       BACKSLASH="\"
       LT="<"
       GT=">"
+      MACRO_REF="regexp:\$\([a-zA-Z0-9_\.]+\)"
   ]
 }
 
@@ -95,18 +96,18 @@ pcdEntry ::= pcdName PIPE pcdValue PIPE pcdType PIPE pcdToken pcdConfiguration? 
 // [UserExtensions]
 userExtensionsHeader ::= "UserExtensions" sectionModifiers?
 userExtensionsSection ::= LBRACKET userExtensionsHeader (COMMA userExtensionsHeader)* RBRACKET CRLF* (userExtensionContent | emptyLineOrComment)*
-userExtensionContent ::= (WORD | STRING | DOT | SLASH | BACKSLASH | MINUS | EQ | PIPE | COMMA | LBRACE | RBRACE | HEX_VAL | INT_VAL | BOOL_VAL | LPAREN | RPAREN)+
+userExtensionContent ::= (WORD | STRING | DOT | SLASH | BACKSLASH | MINUS | EQ | PIPE | COMMA | LBRACE | RBRACE | HEX_VAL | INT_VAL | BOOL_VAL | LPAREN | RPAREN | MACRO_REF)+
 
 // Generic fallback
 genericHeader ::= WORD sectionModifiers?
 genericSection ::= LBRACKET genericHeader (COMMA genericHeader)* RBRACKET CRLF* (genericEntry | emptyLineOrComment)*
-genericEntry ::= (WORD | EQ | PIPE | COMMA | LBRACE | RBRACE | HEX_VAL | INT_VAL | BOOL_VAL)+
+genericEntry ::= (WORD | EQ | PIPE | COMMA | LBRACE | RBRACE | HEX_VAL | INT_VAL | BOOL_VAL | MACRO_REF)+
 
 // Common elements
-sectionModifiers ::= (DOT (WORD | STRING))+ (COMMA (DOT (WORD | STRING))+)*
+sectionModifiers ::= (DOT (WORD | STRING | MACRO_REF))+ (COMMA (DOT (WORD | STRING | MACRO_REF))+)*
 
 key ::= WORD
-value ::= (WORD | STRING | HEX_VAL | INT_VAL | BOOL_VAL | DOT | MINUS | SLASH | BACKSLASH)+
+value ::= (WORD | STRING | HEX_VAL | INT_VAL | BOOL_VAL | DOT | MINUS | SLASH | BACKSLASH | MACRO_REF)+
 
 libraryClassName ::= WORD
 libraryPath ::= path
