@@ -186,7 +186,7 @@ blockContent ::= fdfSection | directiveStatement | key
 // Values
 valueString ::= (IDENTIFIER | NUMBER | STRING | DOT | COMMA | HEX_NUMBER | PATH_STRING | PIPE | MINUS | PLUS | STAR | DIV | MOD | BIT_AND | XOR | BIT_NOT | GUID | COLON | EQ | MACRO_REF | LPAREN | RPAREN | EQ_EQ | NE | LE | GE | AND_OP | OR_OP | APRIORI | INF | FILE | SECTION | SET)+
 
-path ::= (PATH_STRING | IDENTIFIER) {
+path ::= (PATH_STRING | IDENTIFIER | MACRO_REF | DOT | DIV)+ {
   mixin="org.tianocore.edk2idea.Fdf.psi.impl.FdfPathMixin"
 }
 

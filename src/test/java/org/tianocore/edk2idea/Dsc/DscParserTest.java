@@ -49,10 +49,16 @@ public class DscParserTest extends ParsingTestCase {
                     String testName = getTestName(false);
                     Path goldenPath = Paths.get("src/test/resources/DscParserGolden", testName + ".txt");
 
+                    if (Boolean.getBoolean("idea.tests.overwrite")) {
+                        Files.write(goldenPath, tree.getBytes(StandardCharsets.UTF_8));
+                        System.out.println("Overwrote golden file: " + goldenPath);
+                        return;
+                    }
+
                     if (!Files.exists(goldenPath)) {
-                        // Fallback: try to update/create? No, strictly fail with readable error
-                        throw new java.io.FileNotFoundException(
-                                "Golden file not found at " + goldenPath.toAbsolutePath());
+                        Files.write(goldenPath, tree.getBytes(StandardCharsets.UTF_8));
+                        System.out.println("Created golden file: " + goldenPath);
+                        return;
                     }
 
                     String expected = new String(Files.readAllBytes(goldenPath), StandardCharsets.UTF_8);

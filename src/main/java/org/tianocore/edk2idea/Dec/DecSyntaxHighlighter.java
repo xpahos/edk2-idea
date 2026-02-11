@@ -22,12 +22,15 @@ public class DecSyntaxHighlighter extends SyntaxHighlighterBase {
             DefaultLanguageHighlighterColors.INSTANCE_FIELD);
     public static final TextAttributesKey BAD_CHARACTER = createTextAttributesKey("DEC_BAD_CHARACTER",
             DefaultLanguageHighlighterColors.INVALID_STRING_ESCAPE);
+    public static final TextAttributesKey PATH_STRING = createTextAttributesKey("DEC_PATH_STRING",
+            DefaultLanguageHighlighterColors.STRING);
 
     private static final TextAttributesKey[] COMMENT_KEYS = new TextAttributesKey[] { COMMENT };
     private static final TextAttributesKey[] SECTION_HEADER_KEYS = new TextAttributesKey[] { SECTION_HEADER };
     private static final TextAttributesKey[] VALUE_KEYS = new TextAttributesKey[] { VALUE };
     private static final TextAttributesKey[] KEY_KEYS = new TextAttributesKey[] { KEY };
     private static final TextAttributesKey[] BAD_CHAR_KEYS = new TextAttributesKey[] { BAD_CHARACTER };
+    private static final TextAttributesKey[] PATH_STRING_KEYS = new TextAttributesKey[] { PATH_STRING };
     private static final TextAttributesKey[] EMPTY_KEYS = new TextAttributesKey[0];
 
     @NotNull
@@ -49,6 +52,9 @@ public class DecSyntaxHighlighter extends SyntaxHighlighterBase {
         }
         if (tokenType.equals(DecTypes.WORD)) {
             return KEY_KEYS;
+        }
+        if (tokenType.equals(DecTypes.PATH_STRING)) {
+            return PATH_STRING_KEYS;
         }
         return EMPTY_KEYS;
     }

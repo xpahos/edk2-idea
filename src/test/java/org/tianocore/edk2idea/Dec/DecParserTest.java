@@ -58,6 +58,12 @@ public class DecParserTest extends ParsingTestCase {
                     String testName = getTestName(false);
                     Path goldenPath = Paths.get("src/test/resources/DecParserGolden", testName + ".txt");
 
+                    if (Boolean.getBoolean("idea.tests.overwrite")) {
+                        Files.write(goldenPath, tree.getBytes(StandardCharsets.UTF_8));
+                        System.out.println("Overwrote golden file: " + goldenPath);
+                        return;
+                    }
+
                     if (!Files.exists(goldenPath)) {
                         Files.write(goldenPath, tree.getBytes(StandardCharsets.UTF_8));
                         System.out.println("Created golden file: " + goldenPath);

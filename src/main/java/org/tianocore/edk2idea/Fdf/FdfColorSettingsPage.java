@@ -18,6 +18,7 @@ final class FdfColorSettingsPage implements ColorSettingsPage {
             new AttributesDescriptor("Section header", FdfSyntaxHighlighter.SECTION_HEADER),
             new AttributesDescriptor("Keyword", FdfSyntaxHighlighter.KEYWORD),
             new AttributesDescriptor("Command", FdfSyntaxHighlighter.COMMAND),
+            new AttributesDescriptor("Path string", FdfSyntaxHighlighter.PATH_STRING),
     };
 
     @Override

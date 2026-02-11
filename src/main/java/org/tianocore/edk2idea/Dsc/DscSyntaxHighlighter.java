@@ -23,12 +23,15 @@ public class DscSyntaxHighlighter extends SyntaxHighlighterBase {
             DefaultLanguageHighlighterColors.IDENTIFIER);
     public static final TextAttributesKey COMMAND = createTextAttributesKey("DSC_COMMAND",
             DefaultLanguageHighlighterColors.INLINE_SUGGESTION);
+    public static final TextAttributesKey PATH_STRING = createTextAttributesKey("DSC_PATH_STRING",
+            DefaultLanguageHighlighterColors.STRING);
 
     private static final TextAttributesKey[] COMMENT_KEYS = new TextAttributesKey[] { COMMENT };
     private static final TextAttributesKey[] SECTION_HEADER_KEYS = new TextAttributesKey[] { SECTION_HEADER };
     private static final TextAttributesKey[] DEFINES_TAGS_KEYS = new TextAttributesKey[] { DEFINES_KEYS };
     private static final TextAttributesKey[] DEFINES_VALUE_KEYS = new TextAttributesKey[] { DEFINES_VALUES };
     private static final TextAttributesKey[] COMMAND_KEYS = new TextAttributesKey[] { COMMAND };
+    private static final TextAttributesKey[] PATH_STRING_KEYS = new TextAttributesKey[] { PATH_STRING };
     private static final TextAttributesKey[] EMPTY_KEYS = new TextAttributesKey[0];
 
     @NotNull
@@ -57,6 +60,9 @@ public class DscSyntaxHighlighter extends SyntaxHighlighterBase {
                 tokenType.equals(DscTypes.ENDIF) ||
                 tokenType.equals(DscTypes.ERROR)) {
             return COMMAND_KEYS;
+        }
+        if (tokenType.equals(DscTypes.PATH_STRING)) {
+            return PATH_STRING_KEYS;
         }
         return EMPTY_KEYS;
     }

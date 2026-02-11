@@ -6,7 +6,7 @@ FDF File
       FdfDirectiveStatementImpl(DIRECTIVE_STATEMENT)
         FdfIncludeStatementImpl(INCLUDE_STATEMENT)
           PsiElement(FdfTokenType.!include)('!include')
-          FdfValueStringImpl(VALUE_STRING)
+          FdfPathImpl(PATH)
             PsiElement(FdfTokenType.PATH_STRING)('OvmfPkg/Include/Fdf/OvmfPkgDefines.fdf.inc')
           PsiElement(FdfTokenType.CRLF)('\n')
       PsiComment(FdfTokenType.COMMENT)('# Japanese Comment: テスト')

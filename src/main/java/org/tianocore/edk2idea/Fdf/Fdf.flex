@@ -22,7 +22,7 @@ HASH_COMMENT = #[^\r\n]*
 // Identifiers and Strings
 IDENTIFIER = [a-zA-Z0-9_\-\.]+
 STRING = \"([^\"\r\n]*)\"
-PATH_STRING = [a-zA-Z0-9_\-\.\/\\\$]+
+PATH_STRING = [a-zA-Z0-9_\-\.\/\\]+
 MACRO_REF = \$\([a-zA-Z0-9_\.]+\)
 
 // Numbers

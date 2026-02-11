@@ -31,6 +31,13 @@ public class UniParserTest extends ParsingTestCase {
                 try {
                     String testName = getTestName(false);
                     Path goldenPath = Paths.get(getTestDataPath(), testName + ".txt").toAbsolutePath();
+                    String expectedFilePath = goldenPath.toString();
+
+                    if (Boolean.getBoolean("idea.tests.overwrite")) {
+                        Files.write(goldenPath, tree.getBytes(StandardCharsets.UTF_8));
+                        System.out.println("Overwrote golden file: " + goldenPath);
+                        return;
+                    }
 
                     if (!Files.exists(goldenPath)) {
                         Files.write(goldenPath, tree.getBytes(StandardCharsets.UTF_8));
@@ -38,22 +45,10 @@ public class UniParserTest extends ParsingTestCase {
                         return;
                     }
 
-                    // For now, if file exists, we rely on super.doTest() (via ParsingTestCase) to
-                    // check,
-                    // but we can also manually check if needed or just handle the missing case
-                    // logic.
-                    // The ParsingTestCase usually throws if checkResult is true and no file.
-                    // We'll leave standard behavior for now, but keep auto-gen logic for new tests.
-                } catch (IOException e) {
+                    assertSameLinesWithFile(expectedFilePath, tree);
+                } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-            }
-        }
-        if (checkResult) {
-            try {
-                checkResult(getTestName(false), myFile);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
             }
         }
     }

@@ -76,6 +76,7 @@ HASH_COMMENT = #[^\r\n]*
 %state DEFINES_SECTION
 %state SOURCES_SECTION
 %state DEPEX_SECTION
+%state PCD_SECTION
 
 %state DEFINES_SECTION_WAITING_HEX_N_VERSION_NUMBER
 %state DEFINES_SECTION_WAITING_HEX_NUMBER
@@ -117,10 +118,10 @@ HASH_COMMENT = #[^\r\n]*
     \[Protocols[^\]\r\n]*\]              { return InfTypes.PROTOCOLS_SECTION_HEADER; }
     \[Guids[^\]\r\n]*\]                  { return InfTypes.GUIDS_SECTION_HEADER; }
     \[Ppis[^\]\r\n]*\]                   { return InfTypes.PPIS_SECTION_HEADER; }
-    \[Pcd(Ex)?[^\]\r\n]*\]               { return InfTypes.PCD_SECTION_HEADER; }
-    \[FixedPcd[^\]\r\n]*\]               { return InfTypes.PCD_SECTION_HEADER; }
-    \[FeaturePcd[^\]\r\n]*\]             { return InfTypes.PCD_SECTION_HEADER; }
-    \[PatchPcd[^\]\r\n]*\]               { return InfTypes.PCD_SECTION_HEADER; }
+    \[Pcd(Ex)?[^\]\r\n]*\]               { pushState(PCD_SECTION); return InfTypes.PCD_SECTION_HEADER; }
+    \[FixedPcd[^\]\r\n]*\]               { pushState(PCD_SECTION); return InfTypes.PCD_SECTION_HEADER; }
+    \[FeaturePcd[^\]\r\n]*\]             { pushState(PCD_SECTION); return InfTypes.PCD_SECTION_HEADER; }
+    \[PatchPcd[^\]\r\n]*\]               { pushState(PCD_SECTION); return InfTypes.PCD_SECTION_HEADER; }
     \[Depex[^\]\r\n]*\]                  { pushState(DEPEX_SECTION); return InfTypes.DEPEX_SECTION_HEADER; }
     \[Binaries[^\]\r\n]*\]               { return InfTypes.BINARIES_SECTION_HEADER; }
     \[UserExtensions[^\]\r\n]*\]         { return InfTypes.USER_EXTENSIONS_SECTION_HEADER; }
@@ -226,7 +227,7 @@ HASH_COMMENT = #[^\r\n]*
 }
 
 <DEFINES_SECTION_WAITING_BASE_NAME_STRING> {
-    {BASE_NAME_STRING}               { popState(); return InfTypes.BASE_NAME_STRING; }
+    {BASE_NAME_STRING}               { popState(); return InfTypes.BASE_NAME_VALUE; }
     {WHITE_SPACE}                    { return TokenType.WHITE_SPACE; }
     <<EOF>>                          { clearStack(); yybegin(EOF); return InfTypes.CRLF; }
 }
@@ -427,6 +428,30 @@ HASH_COMMENT = #[^\r\n]*
     {BASE_NAME_STRING}               { return InfTypes.BASE_NAME_STRING; }
     {PATH_STRING}                    { return InfTypes.PATH_STRING; }
     {MACRO_REF}                      { return InfTypes.MACRO_REF; }
+
+    <<EOF>>                          { clearStack(); yybegin(EOF); return InfTypes.CRLF; }
+    [^]                              { return TokenType.BAD_CHARACTER; }
+}
+
+<PCD_SECTION> {
+    "[" { yypushback(1); popState(); }
+
+    "|"                              { return InfTypes.PIPE; }
+    "."                              { return InfTypes.DOT; }
+    
+    // Feature flags and values
+    "TRUE"                           { return InfTypes.BOOLEAN_VALUE; }
+    "FALSE"                          { return InfTypes.BOOLEAN_VALUE; }
+    {HEX_NUMBER}                     { return InfTypes.HEX_NUMBER; }
+    {DECIMAL_NUMBER}                 { return InfTypes.NUMBER; }
+    {STRING}                         { return InfTypes.STRING; }
+
+    {IDENTIFIER}                     { return InfTypes.IDENTIFIER; }
+    {MACRO_REF}                      { return InfTypes.MACRO_REF; }
+    
+    {CRLF}                           { return InfTypes.CRLF; }
+    {WHITE_SPACE}                    { return TokenType.WHITE_SPACE; }
+    {HASH_COMMENT}                   { return InfTypes.COMMENT; }
 
     <<EOF>>                          { clearStack(); yybegin(EOF); return InfTypes.CRLF; }
     [^]                              { return TokenType.BAD_CHARACTER; }

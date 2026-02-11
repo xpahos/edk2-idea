@@ -42,6 +42,13 @@ public class FdfParserTest extends ParsingTestCase {
                     // Let's use getTestDataPath() combined with name.
                     Path goldenPath = Paths.get(getTestDataPath(), testName + ".txt");
 
+                    if (Boolean.getBoolean("idea.tests.overwrite")) {
+                        Files.createDirectories(goldenPath.getParent());
+                        Files.write(goldenPath, tree.getBytes(StandardCharsets.UTF_8));
+                        System.out.println("Overwrote golden file: " + goldenPath);
+                        return;
+                    }
+
                     if (!Files.exists(goldenPath)) {
                         // Auto-create for first run if missing
                         Files.createDirectories(goldenPath.getParent());

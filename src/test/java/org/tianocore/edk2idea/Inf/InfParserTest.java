@@ -105,26 +105,37 @@ public class InfParserTest extends ParsingTestCase {
             System.out.println("###### ACTUAL OUTPUT START " + getName() + " ######");
             System.out.println(tree);
             System.out.println("###### ACTUAL OUTPUT END " + getName() + " ######");
-        }
-        if (checkResult) {
-            try {
-                String tree = com.intellij.psi.impl.DebugUtil.psiToString(myFile, false);
-                // Sanitize the tree output to remove unstable object IDs
-                tree = tree.replaceAll(" \\(java\\.lang\\.String@[a-f0-9]+\\)", "")
-                        .replaceAll(
-                                " \\(com\\.intellij\\.platform\\.testFramework\\.core\\.PresentableFileInfo@[a-f0-9]+\\)",
-                                "");
 
-                String expectedFilePath = getTestDataPath() + "/" + getTestName(false) + ".txt";
+            // Sanitize the tree output to remove unstable object IDs
+            tree = tree.replaceAll(" \\(java\\.lang\\.String@[a-f0-9]+\\)", "")
+                    .replaceAll(
+                            " \\(com\\.intellij\\.platform\\.testFramework\\.core\\.PresentableFileInfo@[a-f0-9]+\\)",
+                            "");
 
-                if (Boolean.getBoolean("idea.tests.overwrite")) {
-                    com.intellij.openapi.util.io.FileUtil.writeToFile(new java.io.File(expectedFilePath), tree);
-                    System.out.println("Overwrote golden file: " + expectedFilePath);
-                } else {
+            if (checkResult) {
+                try {
+                    String testName = getTestName(false);
+                    // Use absolute path and robust file writing
+                    java.nio.file.Path goldenPath = java.nio.file.Paths.get(getTestDataPath(), testName + ".txt")
+                            .toAbsolutePath();
+                    String expectedFilePath = goldenPath.toString();
+
+                    if (Boolean.getBoolean("idea.tests.overwrite")) {
+                        java.nio.file.Files.write(goldenPath, tree.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                        System.out.println("Overwrote golden file: " + goldenPath);
+                        return;
+                    }
+
+                    if (!java.nio.file.Files.exists(goldenPath)) {
+                        java.nio.file.Files.write(goldenPath, tree.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                        System.out.println("Created golden file: " + goldenPath);
+                        return;
+                    }
+
                     assertSameLinesWithFile(expectedFilePath, tree);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
             }
         }
     }

@@ -14,19 +14,22 @@ import static org.tianocore.edk2idea.Inf.psi.InfTokenSets.SECTION_HEADERS;
 
 public class InfSyntaxHighlighter extends SyntaxHighlighterBase {
 
-    public static final TextAttributesKey COMMENT =
-            createTextAttributesKey("INF_COMMENT", DefaultLanguageHighlighterColors.LINE_COMMENT);
-    public static final TextAttributesKey SECTION_HEADER =
-            createTextAttributesKey("INF_SECTION_HEADER", DefaultLanguageHighlighterColors.KEYWORD);
-    public static final TextAttributesKey DEFINES_KEYS =
-            createTextAttributesKey("INF_DEFINES_KEYS", DefaultLanguageHighlighterColors.LABEL);
-    public static final TextAttributesKey DEFINES_VALUES =
-            createTextAttributesKey("INF_DEFINES_VALUE", DefaultLanguageHighlighterColors.IDENTIFIER);
+    public static final TextAttributesKey COMMENT = createTextAttributesKey("INF_COMMENT",
+            DefaultLanguageHighlighterColors.LINE_COMMENT);
+    public static final TextAttributesKey SECTION_HEADER = createTextAttributesKey("INF_SECTION_HEADER",
+            DefaultLanguageHighlighterColors.KEYWORD);
+    public static final TextAttributesKey DEFINES_KEYS = createTextAttributesKey("INF_DEFINES_KEYS",
+            DefaultLanguageHighlighterColors.LABEL);
+    public static final TextAttributesKey DEFINES_VALUES = createTextAttributesKey("INF_DEFINES_VALUE",
+            DefaultLanguageHighlighterColors.IDENTIFIER);
+    public static final TextAttributesKey PATH_STRING = createTextAttributesKey("INF_PATH_STRING",
+            DefaultLanguageHighlighterColors.STRING);
 
-    private static final TextAttributesKey[] COMMENT_KEYS = new TextAttributesKey[]{COMMENT};
-    private static final TextAttributesKey[] SECTION_HEADER_KEYS = new TextAttributesKey[]{SECTION_HEADER};
-    private static final TextAttributesKey[] DEFINES_TAGS_KEYS = new TextAttributesKey[]{DEFINES_KEYS};
-    private static final TextAttributesKey[] DEFINES_VALUE_KEYS = new TextAttributesKey[]{DEFINES_VALUES};
+    private static final TextAttributesKey[] COMMENT_KEYS = new TextAttributesKey[] { COMMENT };
+    private static final TextAttributesKey[] SECTION_HEADER_KEYS = new TextAttributesKey[] { SECTION_HEADER };
+    private static final TextAttributesKey[] DEFINES_TAGS_KEYS = new TextAttributesKey[] { DEFINES_KEYS };
+    private static final TextAttributesKey[] DEFINES_VALUE_KEYS = new TextAttributesKey[] { DEFINES_VALUES };
+    private static final TextAttributesKey[] PATH_STRING_KEYS = new TextAttributesKey[] { PATH_STRING };
     private static final TextAttributesKey[] EMPTY_KEYS = new TextAttributesKey[0];
 
     @NotNull
@@ -45,6 +48,9 @@ public class InfSyntaxHighlighter extends SyntaxHighlighterBase {
         }
         if (DEFINES_TAGS.contains(tokenType)) {
             return DEFINES_TAGS_KEYS;
+        }
+        if (tokenType.equals(InfTypes.PATH_STRING) || tokenType.equals(InfTypes.BASE_NAME_STRING)) {
+            return PATH_STRING_KEYS;
         }
         return EMPTY_KEYS;
     }

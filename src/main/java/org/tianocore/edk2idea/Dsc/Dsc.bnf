@@ -48,6 +48,8 @@
     // Comments
     COMMENT="regexp:#[^\r\n]*"
     
+    PATH_STRING="regexp:[a-zA-Z0-9_\-\.\/\\\$]+"
+    COMMAND_FLAG="regexp:\/[a-zA-Z0-9_\-\.]+"
     MACRO_REF="regexp:\$\([a-zA-Z0-9_\.]+\)"
     LPAREN="("
     RPAREN=")"
@@ -173,7 +175,7 @@ defaultStoresSection ::= DEFAULT_STORES_SECTION_HEADER CRLF (defaultStoreStateme
 defaultStoreStatement ::= NUMBER PIPE IDENTIFIER CRLF
 
 // Values
-valueString ::= (IDENTIFIER | NUMBER | STRING | DOT | COMMA | LBRACE | RBRACE | HEX_NUMBER | PATH_STRING | PIPE | MINUS | STAR | GUID | COLON | EQ | MACRO_REF | LPAREN | RPAREN | EQ_EQ | NE | LE | GE | AND | OR | PLUS | LT | GT)+
+valueString ::= (IDENTIFIER | NUMBER | STRING | DOT | COMMA | LBRACE | RBRACE | HEX_NUMBER | PATH_STRING | PIPE | MINUS | STAR | GUID | COLON | EQ | MACRO_REF | LPAREN | RPAREN | EQ_EQ | NE | LE | GE | AND | OR | PLUS | LT | GT | COMMAND_FLAG)+
 
 path ::= (PATH_STRING | IDENTIFIER | MACRO_REF | DOT | SLASH | BACKSLASH)+ {
   mixin="org.tianocore.edk2idea.Dsc.psi.impl.DscPathMixin"

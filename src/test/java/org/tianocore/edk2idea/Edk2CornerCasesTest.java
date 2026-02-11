@@ -710,7 +710,7 @@ public class Edk2CornerCasesTest extends BasePlatformTestCase {
           SKUID_IDENTIFIER = DEFAULT
 
         [Components.$(FSP_ARCH)]
-          }
+          Some/File.inf
         """);
     myFixture.checkHighlighting();
   }
@@ -833,6 +833,78 @@ public class Edk2CornerCasesTest extends BasePlatformTestCase {
         "[Depex]\r" +
         "  gEfiMpInitLibUpDepProtocolGuid\r";
     myFixture.configureByText("TestDepexCR.inf", content);
+    myFixture.checkHighlighting();
+  }
+
+  public void testDscBuildOptionsFlags() {
+    myFixture.configureByText("Test.dsc", """
+        [Defines]
+          PLATFORM_NAME = Test
+          PLATFORM_GUID = 00000000-0000-0000-0000-000000000000
+          PLATFORM_VERSION = 1.0
+          DSC_SPECIFICATION = 0x00010005
+          OUTPUT_DIRECTORY = Build/Test
+          SUPPORTED_ARCHITECTURES = X64
+          BUILD_TARGETS = DEBUG|RELEASE
+          SKUID_IDENTIFIER = DEFAULT
+
+        [BuildOptions]
+          INTEL:RELEASE_*_*_CC_FLAGS           = /D MDEPKG_NDEBUG
+
+        [BuildOptions.common.EDKII.DXE_RUNTIME_DRIVER]
+          CLANGPDB:*_*_*_DLINK_FLAGS = /ALIGN:4096
+        """);
+    myFixture.checkHighlighting();
+  }
+
+  public void testFdfRulePathSeparation() {
+    myFixture.configureByText("TestRulePath.fdf", """
+        [Rule.Common.SEC]
+          FILE SEC = $(NAMED_GUID) {
+            PE32     PE32           $(INF_OUTPUT)/$(MODULE_NAME).efi
+            UI       STRING ="$(MODULE_NAME)" Optional
+            VERSION  STRING ="$(INF_VERSION)" Optional BUILD_NUM=$(BUILD_NUMBER)
+          }
+        """);
+    myFixture.checkHighlighting();
+  }
+
+  public void testInfSourcesHighlighting() {
+    myFixture.configureByText("TestSources.inf", """
+        [Defines]
+          INF_VERSION = 0x00010005
+          BASE_NAME = Test
+          FILE_GUID = 00000000-0000-0000-0000-000000000000
+          VERSION_STRING = 1.0
+          MODULE_TYPE = BASE
+        [Sources]
+          <info descr="INF_PATH_STRING">DxePcdLib.c</info>
+        """);
+    myFixture.checkHighlighting();
+  }
+
+  public void testInfBaseNameNavigation() {
+    myFixture.configureByText("TestBaseName.inf", """
+        [Defines]
+          BASE_NAME = <info descr="null">DxeMpInitLibUpDepLib</info>
+        """);
+    myFixture.checkHighlighting();
+  }
+
+  public void testInfPcdParsing() {
+    myFixture.configureByText("TestPcd.inf", """
+        [Defines]
+          INF_VERSION = 1.25
+          BASE_NAME = TestPcd
+          FILE_GUID = 00000000-0000-0000-0000-000000000000
+          MODULE_TYPE = BASE
+          VERSION_STRING = 1.0
+
+        [Pcd]
+          <info descr="null">gUefiOvmfPkgTokenSpaceGuid.PcdOvmfPeiMemFvBase</info>
+        [FixedPcd]
+          <info descr="null">gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress</info>
+        """);
     myFixture.checkHighlighting();
   }
 }

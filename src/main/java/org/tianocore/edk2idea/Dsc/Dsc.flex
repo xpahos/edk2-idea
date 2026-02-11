@@ -23,6 +23,7 @@ HASH_COMMENT = #[^\r\n]*
 IDENTIFIER = [a-zA-Z0-9_\-\.]+
 STRING = \"([^\"\r\n]*)\"
 PATH_STRING = [a-zA-Z0-9_\-\.\/\\\$]+
+COMMAND_FLAG = \/[a-zA-Z0-9_\-\.]+
 MACRO_REF = \$\([a-zA-Z0-9_\.]+\)
 
 // Numbers
@@ -100,6 +101,7 @@ GUID = [0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{1
     {MACRO_REF}                      { return DscTypes.MACRO_REF; }
     {IDENTIFIER}                     { return DscTypes.IDENTIFIER; }
 
+    {COMMAND_FLAG}                   { return DscTypes.COMMAND_FLAG; }
     {PATH_STRING}                    { return DscTypes.PATH_STRING; }
     
     {CRLF}                           { return DscTypes.CRLF; }
