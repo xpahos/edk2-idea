@@ -12,7 +12,7 @@ EDK2 Inf File
       InfDefineEntryImpl(DEFINE_ENTRY)
         PsiElement(InfTokenType.BASE_NAME)('BASE_NAME')
         PsiElement(InfTokenType.EQUALS)('=')
-        PsiElement(InfTokenType.BASE_NAME_STRING)('FirmwarePerformanceDxe')
+        PsiElement(InfTokenType.BASE_NAME_VALUE)('FirmwarePerformanceDxe')
       PsiElement(InfTokenType.CRLF)('\n')
     InfDefineStatementImpl(DEFINE_STATEMENT)
       InfDefineEntryImpl(DEFINE_ENTRY)

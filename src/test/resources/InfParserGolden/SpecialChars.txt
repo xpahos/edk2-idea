@@ -19,7 +19,7 @@ EDK2 Inf File
       InfDefineEntryImpl(DEFINE_ENTRY)
         PsiElement(InfTokenType.BASE_NAME)('BASE_NAME')
         PsiElement(InfTokenType.EQUALS)('=')
-        PsiElement(InfTokenType.BASE_NAME_STRING)('PlatformAcpiTable')
+        PsiElement(InfTokenType.BASE_NAME_VALUE)('PlatformAcpiTable')
         PsiErrorElement:'あ' unexpected
           PsiElement(BAD_CHARACTER)('あ')
         PsiElement(BAD_CHARACTER)('り')
