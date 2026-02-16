@@ -23,7 +23,9 @@ HASH_COMMENT = #[^\r\n]*
 IDENTIFIER = [a-zA-Z0-9_\-\.]+
 STRING = \"([^\"\r\n]*)\"
 PATH_STRING = [a-zA-Z0-9_\-\.\/\\\$]+
-COMMAND_FLAG = \/[a-zA-Z0-9_\-\.]+
+// COMMAND_FLAG: / followed by 1-4 uppercase letters (e.g., /D, /I, /O, /Od, /W3)
+// This ensures it doesn't match longer file paths like /BaseLib.inf
+COMMAND_FLAG = \/[A-Z][A-Z]{0,3}
 MACRO_REF = \$\([a-zA-Z0-9_\.]+\)
 
 // Numbers
@@ -88,21 +90,25 @@ GUID = [0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{1
     "!="                             { return DscTypes.NE; }
     "<="                             { return DscTypes.LE; }
     ">="                             { return DscTypes.GE; }
-    "&&"                             { return DscTypes.AND; }
-    "||"                             { return DscTypes.OR; }
-    "+"                              { return DscTypes.PLUS; }
+     "&&"                             { return DscTypes.AND; }
+     "||"                             { return DscTypes.OR; }
+     "+"                              { return DscTypes.PLUS; }
 
-    // Values
-    {GUID}                           { return DscTypes.GUID; }
-    {HEX_NUMBER}                     { return DscTypes.HEX_NUMBER; }
-    {NUMBER}                         { return DscTypes.NUMBER; }
-    {STRING}                         { return DscTypes.STRING; }
-    // Identifiers (Specific) - Must be before PATH_STRING fallback if using generic match
-    {MACRO_REF}                      { return DscTypes.MACRO_REF; }
-    {IDENTIFIER}                     { return DscTypes.IDENTIFIER; }
+     // Values - IMPORTANT: Order matters for conflicting patterns
+     {GUID}                           { return DscTypes.GUID; }
+     {HEX_NUMBER}                     { return DscTypes.HEX_NUMBER; }
+     {NUMBER}                         { return DscTypes.NUMBER; }
+     {STRING}                         { return DscTypes.STRING; }
+     
+     // COMMAND_FLAG must come before PATH_STRING to match /D, /I, etc.
+     // Pattern: / followed by uppercase letter (e.g., /D, /I, /O, /Fd, /Od)
+     {COMMAND_FLAG}                   { return DscTypes.COMMAND_FLAG; }
+     
+     // Macro references must come before IDENTIFIER
+     {MACRO_REF}                      { return DscTypes.MACRO_REF; }
+     {IDENTIFIER}                     { return DscTypes.IDENTIFIER; }
 
-    {COMMAND_FLAG}                   { return DscTypes.COMMAND_FLAG; }
-    {PATH_STRING}                    { return DscTypes.PATH_STRING; }
+     {PATH_STRING}                    { return DscTypes.PATH_STRING; }
     
     {CRLF}                           { return DscTypes.CRLF; }
     {WHITE_SPACE}                    { return TokenType.WHITE_SPACE; }
