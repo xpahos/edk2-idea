@@ -104,9 +104,7 @@
         <colorSettingsPage
                 implementation="org.tianocore.edk2idea.Uni.UniColorSettingsPage"/>
         
-        <annotator
-                language="EDK2 Description Module"
-                implementationClass="org.tianocore.edk2idea.annotator.DscPcdAnnotator"/>
+
 
         <lang.findUsagesProvider
                 language="EDK2 Package Declaration File"

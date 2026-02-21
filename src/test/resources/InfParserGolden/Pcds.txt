@@ -87,7 +87,7 @@ EDK2 Inf File
           InfPcdNameImpl(PCD_NAME)
             PsiElement(InfTokenType.PCD_NAME_TOKEN)('gEfiMdePkgTokenSpaceGuid.PcdComponentName2Disable')
           PsiElement(InfTokenType.PIPE)('|')
-          InfFeatureFlagExpressionImpl(FEATURE_FLAG_EXPRESSION)
+          InfPcdDefaultValueImpl(PCD_DEFAULT_VALUE)
             PsiElement(InfTokenType.BOOLEAN_VALUE)('TRUE')
         PsiElement(InfTokenType.CRLF)('\n')
       InfEmptyLineOrCommentImpl(EMPTY_LINE_OR_COMMENT)

@@ -146,7 +146,7 @@ pcdName ::= PCD_NAME_TOKEN | BASE_NAME_STRING {
     mixin="org.tianocore.edk2idea.Inf.psi.impl.InfPcdNameMixin"
     implements="com.intellij.psi.PsiNameIdentifierOwner"
 }
-pcdDefaultValue ::= STRING | MACRO_IDENTIFIER | expression
+
 
 // DEPEX section
 depexSection ::= DEPEX_SECTION_HEADER depexExpression?

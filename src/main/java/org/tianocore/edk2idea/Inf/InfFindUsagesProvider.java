@@ -15,7 +15,7 @@ public class InfFindUsagesProvider implements FindUsagesProvider {
     @Override
     public WordsScanner getWordsScanner() {
         return new DefaultWordsScanner(new InfLexerAdapter(),
-                TokenSet.create(InfTypes.IDENTIFIER, InfTypes.MACRO_IDENTIFIER, InfTypes.STRING),
+                TokenSet.create(InfTypes.IDENTIFIER, InfTypes.MACRO_REF, InfTypes.STRING),
                 TokenSet.create(InfTypes.COMMENT),
                 TokenSet.create(InfTypes.STRING));
     }

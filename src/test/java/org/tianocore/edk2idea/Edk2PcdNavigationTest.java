@@ -11,48 +11,6 @@ public class Edk2PcdNavigationTest extends BasePlatformTestCase {
                 return "src/test/testData/PcdNavigation";
         }
 
-        /**
-         * Error SHOULD appear: PCD declared as FixedAtBuild in DEC,
-         * and redefined in a [PcdsFixedAtBuild] section in the DSC.
-         */
-        public void testFixedAtBuildAnnotator() {
-                myFixture.configureByText("Test.dec", "[Defines]\n[PcdsFixedAtBuild]\n" +
-                                "  TokenSpaceGuid.PcdTestFixedAtBuild|0x00|UINT32|0x00000001\n");
-
-                myFixture.configureByText("Test.dsc", "[Defines]\n[PcdsFixedAtBuild]\n" +
-                                "  <error descr=\"FixedAtBuild variables cannot be redefined\">TokenSpaceGuid.PcdTestFixedAtBuild</error>|0x01\n");
-
-                myFixture.checkHighlighting();
-        }
-
-        /**
-         * Error should NOT appear: PCD declared as FixedAtBuild in DEC,
-         * but used in a [PcdsDynamic] section in the DSC — that's allowed.
-         */
-        public void testNoAnnotationInPcdsDynamic() {
-                myFixture.configureByText("TestDyn.dec", "[Defines]\n[PcdsFixedAtBuild]\n" +
-                                "  TokenSpaceGuid.PcdTestDyn|0x00|UINT32|0x00000001\n");
-
-                myFixture.configureByText("TestDyn.dsc", "[Defines]\n[PcdsDynamic]\n" +
-                                "  TokenSpaceGuid.PcdTestDyn|0x01\n");
-
-                myFixture.checkHighlighting();
-        }
-
-        /**
-         * Error should NOT appear: PCD declared as FixedAtBuild in DEC,
-         * but used in a [PcdsFeatureFlag] section in the DSC — that's allowed.
-         */
-        public void testNoAnnotationInPcdsFeatureFlag() {
-                myFixture.configureByText("TestFF.dec", "[Defines]\n[PcdsFixedAtBuild]\n" +
-                                "  TokenSpaceGuid.PcdTestFF|0x00|UINT32|0x00000001\n");
-
-                myFixture.configureByText("TestFF.dsc", "[Defines]\n[PcdsFeatureFlag]\n" +
-                                "  TokenSpaceGuid.PcdTestFF|FALSE\n");
-
-                myFixture.checkHighlighting();
-        }
-
         public void testPcdFindUsages() {
                 myFixture.configureByText("Test.dec", "[Defines]\n[PcdsFixedAtBuild]\n" +
                                 "  TokenSpaceGuid.PcdTest<caret>FixedAtBuild|0x00|UINT32|0x00000001\n");
