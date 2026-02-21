@@ -35,6 +35,7 @@ GUID = [0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{1
 
 %state WAITING_VALUE
 %state WAITING_INCLUDE_PATH
+%state PCD_SECTION
 %state EOF
 
 %%
@@ -44,7 +45,7 @@ GUID = [0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{1
     \[Defines(\.[a-zA-Z0-9_]+)?\]         { return DscTypes.DEFINES_SECTION_HEADER; }
     \[Packages(\.[a-zA-Z0-9_\$\(\)]+)?\]        { return DscTypes.PACKAGES_SECTION_HEADER; }
     \[LibraryClasses(\.[a-zA-Z0-9_\., \$\(\)]+)?\]  { return DscTypes.LIBRARY_CLASSES_SECTION_HEADER; }
-    \[Pcds[a-zA-Z0-9_]*(\.[a-zA-Z0-9_\., \$\(\)]+)?\]  { return DscTypes.PCD_SECTION_HEADER; }
+    \[Pcds[a-zA-Z0-9_]*(\.[a-zA-Z0-9_\., \$\(\)]+)?\]  { yybegin(PCD_SECTION); return DscTypes.PCD_SECTION_HEADER; }
     \[BuildOptions(\.[a-zA-Z0-9_\., \$\(\)]+)?\]    { return DscTypes.BUILD_OPTIONS_SECTION_HEADER; }
     \[SkuIds(\.[a-zA-Z0-9_\$\(\)]+)?\]          { return DscTypes.SKU_IDS_SECTION_HEADER; }
     \[Components(\.[a-zA-Z0-9_\., \$\(\)]+)?\]      { return DscTypes.COMPONENTS_SECTION_HEADER; }
@@ -114,6 +115,64 @@ GUID = [0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{1
     {WHITE_SPACE}                    { return TokenType.WHITE_SPACE; }
     {HASH_COMMENT}                   { return DscTypes.COMMENT; }
     
+    <<EOF>>                          { yybegin(EOF); return DscTypes.CRLF; }
+}
+
+<PCD_SECTION> {
+    "[" { yypushback(1); yybegin(YYINITIAL); }
+
+    {HASH_COMMENT}                   { return DscTypes.COMMENT; }
+
+    // Directives inside PCD sections
+    "!include"                       { yybegin(WAITING_INCLUDE_PATH); return DscTypes.INCLUDE; }
+    "!ifdef"                         { return DscTypes.IFDEF; }
+    "!ifndef"                        { return DscTypes.IFNDEF; }
+    "!if"                            { return DscTypes.IF; }
+    "!elseif"                        { return DscTypes.ELSEIF; }
+    "!else"                          { return DscTypes.ELSE; }
+    "!endif"                         { return DscTypes.ENDIF; }
+    "!error"                         { return DscTypes.ERROR; }
+
+    // Symbols
+    "|"                              { return DscTypes.PIPE; }
+    "."                              { return DscTypes.DOT; }
+    ","                              { return DscTypes.COMMA; }
+    ":"                              { return DscTypes.COLON; }
+    "{"                              { return DscTypes.LBRACE; }
+    "}"                              { return DscTypes.RBRACE; }
+    "<"                              { return DscTypes.LT; }
+    ">"                              { return DscTypes.GT; }
+    "="                              { return DscTypes.EQ; }
+    "*"                              { return DscTypes.STAR; }
+    "-"                              { return DscTypes.IDENTIFIER; }
+    "("                              { return DscTypes.LPAREN; }
+    ")"                              { return DscTypes.RPAREN; }
+    "=="                             { return DscTypes.EQ_EQ; }
+    "!="                             { return DscTypes.NE; }
+    "<="                             { return DscTypes.LE; }
+    ">="                             { return DscTypes.GE; }
+    "&&"                             { return DscTypes.AND; }
+    "||"                             { return DscTypes.OR; }
+    "+"                              { return DscTypes.PLUS; }
+
+    // Values
+    "TRUE"                           { return DscTypes.IDENTIFIER; }
+    "FALSE"                          { return DscTypes.IDENTIFIER; }
+    {GUID}                           { return DscTypes.GUID; }
+    {HEX_NUMBER}                     { return DscTypes.HEX_NUMBER; }
+    {NUMBER}                         { return DscTypes.NUMBER; }
+    {STRING}                         { return DscTypes.STRING; }
+    {MACRO_REF}                      { return DscTypes.MACRO_REF; }
+
+    // PCD name: identifier with dots (e.g., gEfiMdePkgTokenSpaceGuid.PcdFSBClock)
+    [a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)+  { return DscTypes.PCD_NAME_TOKEN; }
+    {IDENTIFIER}                     { return DscTypes.IDENTIFIER; }
+
+    {PATH_STRING}                    { return DscTypes.PATH_STRING; }
+
+    {CRLF}                           { return DscTypes.CRLF; }
+    {WHITE_SPACE}                    { return TokenType.WHITE_SPACE; }
+
     <<EOF>>                          { yybegin(EOF); return DscTypes.CRLF; }
 }
 

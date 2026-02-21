@@ -28,6 +28,9 @@
         <psi.referenceContributor language="EDK2 Description Module" implementation="org.tianocore.edk2idea.Edk2ReferenceContributor"/>
         <psi.referenceContributor language="EDK2 Flash Description File" implementation="org.tianocore.edk2idea.Edk2ReferenceContributor"/>
 
+        <fileBasedIndex implementation="org.tianocore.edk2idea.index.DecPcdIndex"/>
+        <fileBasedIndex implementation="org.tianocore.edk2idea.index.DscPcdIndex"/>
+
         <fileType
                 name="EDK2 Inf File"
                 implementationClass="org.tianocore.edk2idea.Inf.InfFileType"
@@ -100,5 +103,21 @@
                 implementation="org.tianocore.edk2idea.Dec.DecColorSettingsPage"/>
         <colorSettingsPage
                 implementation="org.tianocore.edk2idea.Uni.UniColorSettingsPage"/>
+        
+        <annotator
+                language="EDK2 Description Module"
+                implementationClass="org.tianocore.edk2idea.annotator.DscPcdAnnotator"/>
+
+        <lang.findUsagesProvider
+                language="EDK2 Package Declaration File"
+                implementationClass="org.tianocore.edk2idea.Dec.DecFindUsagesProvider"/>
+        <lang.findUsagesProvider
+                language="EDK2 Description Module"
+                implementationClass="org.tianocore.edk2idea.Dsc.DscFindUsagesProvider"/>
+        <lang.findUsagesProvider
+                language="EDK2 Information Module"
+                implementationClass="org.tianocore.edk2idea.Inf.InfFindUsagesProvider"/>
+        <referencesSearch implementation="org.tianocore.edk2idea.search.Edk2PcdReferenceSearcher"/>
+        <fileBasedIndex implementation="org.tianocore.edk2idea.index.InfPcdIndex"/>
     </extensions>
 </idea-plugin>

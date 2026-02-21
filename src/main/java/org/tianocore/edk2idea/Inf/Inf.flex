@@ -446,6 +446,7 @@ HASH_COMMENT = #[^\r\n]*
     {DECIMAL_NUMBER}                 { return InfTypes.NUMBER; }
     {STRING}                         { return InfTypes.STRING; }
 
+    {IDENTIFIER}(\.{IDENTIFIER})+    { return InfTypes.PCD_NAME_TOKEN; }
     {IDENTIFIER}                     { return InfTypes.IDENTIFIER; }
     {MACRO_REF}                      { return InfTypes.MACRO_REF; }
     

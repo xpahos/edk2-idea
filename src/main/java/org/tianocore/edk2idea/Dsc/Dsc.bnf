@@ -60,6 +60,7 @@
     AND="&&"
     OR="||"
     PLUS="+"
+    PCD_NAME_TOKEN="regexp:[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)+"
   ]
 }
 
@@ -143,7 +144,10 @@ libraryClassEntry ::= key PIPE path
 pcdSection ::= PCD_SECTION_HEADER CRLF (pcdStatement | directiveStatement | emptyLineOrComment)*
 pcdStatement ::= pcdEntry CRLF
 pcdEntry ::= pcdName PIPE valueString
-pcdName ::= key (DOT key)*
+pcdName ::= PCD_NAME_TOKEN | (key (DOT key)*) {
+    mixin="org.tianocore.edk2idea.Dsc.psi.impl.DscPcdNameMixin"
+    implements="com.intellij.psi.PsiNameIdentifierOwner"
+}
 
 // Build Options
 buildOptionsSection ::= BUILD_OPTIONS_SECTION_HEADER CRLF (buildOptionStatement | directiveStatement | emptyLineOrComment)*

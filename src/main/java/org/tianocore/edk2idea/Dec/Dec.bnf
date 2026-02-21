@@ -32,6 +32,8 @@
       BOOL_VAL="regexp:(TRUE|FALSE|true|false)"
       
       SECTION_NAME="regexp:[a-zA-Z0-9_.]+"
+      PCD_SECTION_HEADER="regexp:\[Pcds[^\]]*\]"
+      PCD_NAME_TOKEN="regexp:[a-zA-Z0-9_]+(\.[a-zA-Z0-9_]+)+"
       WORD="regexp:[^\[\]=\s|{},]+"
       STRING="regexp:\"[^\"]*\""
       PATH_STRING="regexp:[a-zA-Z0-9_\-\.\/\\\$]+"
@@ -88,20 +90,18 @@ ppisSection ::= LBRACKET ppisHeader (COMMA ppisHeader)* RBRACKET CRLF* (guidEntr
 guidEntry ::= guidName EQ guidValue {methods=[getName getValue]}
 
 // [Pcds...]
-pcdsHeader ::= pcdSectionType sectionModifiers?
-pcdsSection ::= LBRACKET pcdsHeader (COMMA pcdsHeader)* RBRACKET CRLF* (pcdEntry | emptyLineOrComment)*
-pcdSectionType ::= "PcdsFixedAtBuild" | "PcdsPatchableInModule" | "PcdsFeatureFlag" | "PcdsDynamic" | "PcdsDynamicEx" | "PcdsDynamicHii" | "PcdsDynamicVpd"
+pcdsSection ::= PCD_SECTION_HEADER CRLF* (pcdEntry | emptyLineOrComment)*
 pcdEntry ::= pcdName PIPE pcdValue PIPE pcdType PIPE pcdToken pcdConfiguration? {methods=[getName getValue getType getToken]}
 
 // [UserExtensions]
 userExtensionsHeader ::= "UserExtensions" sectionModifiers?
 userExtensionsSection ::= LBRACKET userExtensionsHeader (COMMA userExtensionsHeader)* RBRACKET CRLF* (userExtensionContent | emptyLineOrComment)*
-userExtensionContent ::= (WORD | STRING | DOT | SLASH | BACKSLASH | MINUS | EQ | PIPE | COMMA | LBRACE | RBRACE | HEX_VAL | INT_VAL | BOOL_VAL | LPAREN | RPAREN | MACRO_REF)+
+userExtensionContent ::= (WORD | PCD_NAME_TOKEN | STRING | DOT | SLASH | BACKSLASH | MINUS | EQ | PIPE | COMMA | LBRACE | RBRACE | HEX_VAL | INT_VAL | BOOL_VAL | LPAREN | RPAREN | MACRO_REF)+
 
 // Generic fallback
 genericHeader ::= WORD sectionModifiers?
 genericSection ::= LBRACKET genericHeader (COMMA genericHeader)* RBRACKET CRLF* (genericEntry | emptyLineOrComment)*
-genericEntry ::= (WORD | EQ | PIPE | COMMA | LBRACE | RBRACE | HEX_VAL | INT_VAL | BOOL_VAL | MACRO_REF)+
+genericEntry ::= (WORD | PCD_NAME_TOKEN | EQ | PIPE | COMMA | LBRACE | RBRACE | HEX_VAL | INT_VAL | BOOL_VAL | MACRO_REF)+
 
 // Common elements
 sectionModifiers ::= (DOT (WORD | STRING | MACRO_REF))+ (COMMA (DOT (WORD | STRING | MACRO_REF))+)*
@@ -116,12 +116,15 @@ guidName ::= WORD
 guidValue ::= LBRACE guidStructure RBRACE
 guidStructure ::= ((HEX_VAL | INT_VAL) COMMA?)+ (LBRACE ((HEX_VAL | INT_VAL) COMMA?)+ RBRACE)?
 
-pcdName ::= WORD (DOT WORD)*
+pcdName ::= PCD_NAME_TOKEN {
+    mixin="org.tianocore.edk2idea.Dec.psi.impl.DecPcdNameMixin"
+    implements="com.intellij.psi.PsiNameIdentifierOwner"
+}
 pcdValue ::= (WORD? STRING) | pcdName | HEX_VAL | INT_VAL | BOOL_VAL | guidValue
 pcdType ::= "BOOLEAN" | "UINT8" | "UINT16" | "UINT32" | "UINT64" | "VOID*" | WORD
 pcdToken ::= HEX_VAL | INT_VAL
 
-pcdConfiguration ::= LBRACE (LT | GT | WORD | SLASH | DOT | MINUS | HEX_VAL | INT_VAL | LPAREN | RPAREN | WHITE_SPACE | CRLF)* RBRACE
+pcdConfiguration ::= LBRACE (LT | GT | WORD | PCD_NAME_TOKEN | SLASH | DOT | MINUS | HEX_VAL | INT_VAL | LPAREN | RPAREN | WHITE_SPACE | CRLF)* RBRACE
 
 path ::= (WORD | SLASH | DOT | BACKSLASH | MINUS) + {
   mixin="org.tianocore.edk2idea.Dec.psi.impl.DecPathMixin"

@@ -19,6 +19,7 @@ final class InfColorSettingsPage implements ColorSettingsPage {
       new AttributesDescriptor("Defines keys", InfSyntaxHighlighter.DEFINES_KEYS),
       new AttributesDescriptor("Defines values", InfSyntaxHighlighter.DEFINES_VALUES),
       new AttributesDescriptor("Path string", InfSyntaxHighlighter.PATH_STRING),
+      new AttributesDescriptor("PCD variable", InfSyntaxHighlighter.PCD_NAME),
   };
 
   @Override

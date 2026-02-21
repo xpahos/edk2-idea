@@ -20,6 +20,7 @@ final class DscColorSettingsPage implements ColorSettingsPage {
       new AttributesDescriptor("Defines values", DscSyntaxHighlighter.DEFINES_VALUES),
       new AttributesDescriptor("Command", DscSyntaxHighlighter.COMMAND),
       new AttributesDescriptor("Path string", DscSyntaxHighlighter.PATH_STRING),
+      new AttributesDescriptor("PCD variable", DscSyntaxHighlighter.PCD_NAME),
   };
 
   @Override

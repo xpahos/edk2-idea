@@ -25,6 +25,8 @@ public class DscSyntaxHighlighter extends SyntaxHighlighterBase {
             DefaultLanguageHighlighterColors.INLINE_SUGGESTION);
     public static final TextAttributesKey PATH_STRING = createTextAttributesKey("DSC_PATH_STRING",
             DefaultLanguageHighlighterColors.STRING);
+    public static final TextAttributesKey PCD_NAME = createTextAttributesKey("DSC_PCD_NAME",
+            DefaultLanguageHighlighterColors.LOCAL_VARIABLE);
 
     private static final TextAttributesKey[] COMMENT_KEYS = new TextAttributesKey[] { COMMENT };
     private static final TextAttributesKey[] SECTION_HEADER_KEYS = new TextAttributesKey[] { SECTION_HEADER };
@@ -32,6 +34,7 @@ public class DscSyntaxHighlighter extends SyntaxHighlighterBase {
     private static final TextAttributesKey[] DEFINES_VALUE_KEYS = new TextAttributesKey[] { DEFINES_VALUES };
     private static final TextAttributesKey[] COMMAND_KEYS = new TextAttributesKey[] { COMMAND };
     private static final TextAttributesKey[] PATH_STRING_KEYS = new TextAttributesKey[] { PATH_STRING };
+    private static final TextAttributesKey[] PCD_NAME_KEYS = new TextAttributesKey[] { PCD_NAME };
     private static final TextAttributesKey[] EMPTY_KEYS = new TextAttributesKey[0];
 
     @NotNull
@@ -63,6 +66,9 @@ public class DscSyntaxHighlighter extends SyntaxHighlighterBase {
         }
         if (tokenType.equals(DscTypes.PATH_STRING)) {
             return PATH_STRING_KEYS;
+        }
+        if (tokenType.equals(DscTypes.PCD_NAME_TOKEN)) {
+            return PCD_NAME_KEYS;
         }
         return EMPTY_KEYS;
     }

@@ -18,6 +18,7 @@ public class DecColorSettingsPage implements ColorSettingsPage {
       new AttributesDescriptor("Value", DecSyntaxHighlighter.VALUE),
       new AttributesDescriptor("Comment", DecSyntaxHighlighter.COMMENT),
       new AttributesDescriptor("Path string", DecSyntaxHighlighter.PATH_STRING),
+      new AttributesDescriptor("PCD variable", DecSyntaxHighlighter.PCD_NAME),
   };
 
   @Nullable

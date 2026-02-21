@@ -24,12 +24,15 @@ public class InfSyntaxHighlighter extends SyntaxHighlighterBase {
             DefaultLanguageHighlighterColors.IDENTIFIER);
     public static final TextAttributesKey PATH_STRING = createTextAttributesKey("INF_PATH_STRING",
             DefaultLanguageHighlighterColors.STRING);
+    public static final TextAttributesKey PCD_NAME = createTextAttributesKey("INF_PCD_NAME",
+            DefaultLanguageHighlighterColors.LOCAL_VARIABLE);
 
     private static final TextAttributesKey[] COMMENT_KEYS = new TextAttributesKey[] { COMMENT };
     private static final TextAttributesKey[] SECTION_HEADER_KEYS = new TextAttributesKey[] { SECTION_HEADER };
     private static final TextAttributesKey[] DEFINES_TAGS_KEYS = new TextAttributesKey[] { DEFINES_KEYS };
     private static final TextAttributesKey[] DEFINES_VALUE_KEYS = new TextAttributesKey[] { DEFINES_VALUES };
     private static final TextAttributesKey[] PATH_STRING_KEYS = new TextAttributesKey[] { PATH_STRING };
+    private static final TextAttributesKey[] PCD_NAME_KEYS = new TextAttributesKey[] { PCD_NAME };
     private static final TextAttributesKey[] EMPTY_KEYS = new TextAttributesKey[0];
 
     @NotNull
@@ -51,6 +54,9 @@ public class InfSyntaxHighlighter extends SyntaxHighlighterBase {
         }
         if (tokenType.equals(InfTypes.PATH_STRING) || tokenType.equals(InfTypes.BASE_NAME_STRING)) {
             return PATH_STRING_KEYS;
+        }
+        if (tokenType.equals(InfTypes.PCD_NAME_TOKEN)) {
+            return PCD_NAME_KEYS;
         }
         return EMPTY_KEYS;
     }

@@ -28,6 +28,7 @@
     PATH_STRING
     DEFINE_VALUE
     NOT
+    PCD_NAME_TOKEN
     AND
     OR
     BOOLEAN_VALUE
@@ -141,7 +142,11 @@ ppiEntry ::= identifierValue (PIPE featureFlagExpression)?
 pcdSection ::= PCD_SECTION_HEADER CRLF (pcdStatement | emptyLineOrComment)*
 pcdStatement ::= pcdEntry CRLF | usageComment CRLF | COMMENT CRLF
 pcdEntry ::= pcdName (PIPE pcdDefaultValue)? (PIPE featureFlagExpression)?
-pcdName ::= IDENTIFIER DOT IDENTIFIER | BASE_NAME_STRING
+pcdName ::= PCD_NAME_TOKEN | BASE_NAME_STRING {
+    mixin="org.tianocore.edk2idea.Inf.psi.impl.InfPcdNameMixin"
+    implements="com.intellij.psi.PsiNameIdentifierOwner"
+}
+pcdDefaultValue ::= STRING | MACRO_IDENTIFIER | expression
 
 // DEPEX section
 depexSection ::= DEPEX_SECTION_HEADER depexExpression?
