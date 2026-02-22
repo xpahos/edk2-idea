@@ -19,6 +19,9 @@ public class DecColorSettingsPage implements ColorSettingsPage {
       new AttributesDescriptor("Comment", DecSyntaxHighlighter.COMMENT),
       new AttributesDescriptor("Path string", DecSyntaxHighlighter.PATH_STRING),
       new AttributesDescriptor("PCD variable", DecSyntaxHighlighter.PCD_NAME),
+      new AttributesDescriptor("Guid variable", DecSyntaxHighlighter.GUID_NAME),
+      new AttributesDescriptor("Protocol variable", DecSyntaxHighlighter.PROTOCOL_NAME),
+      new AttributesDescriptor("Ppi variable", DecSyntaxHighlighter.PPI_NAME),
   };
 
   @Nullable
@@ -51,10 +54,13 @@ public class DecColorSettingsPage implements ColorSettingsPage {
           UefiUsbLib|Include/Library/UefiUsbLib.h
 
         [Guids]
-          gEfiGlobalVariableGuid         = { 0x8BE4DF61, 0x93CA, 0x11D2, { 0xAA, 0x0D, 0x00, 0xE0, 0x98, 0x03, 0x2B, 0x8C }}
+          <GuidName>gEfiGlobalVariableGuid</GuidName>         = { 0x8BE4DF61, 0x93CA, 0x11D2, { 0xAA, 0x0D, 0x00, 0xE0, 0x98, 0x03, 0x2B, 0x8C }}
 
         [Protocols]
-          gPcdProtocolGuid               = { 0x11B34006, 0xD85B, 0x4D0A, { 0xA2, 0x90, 0xD5, 0xA5, 0x71, 0x31, 0x0E, 0xF7 }}
+          <ProtocolName>gPcdProtocolGuid</ProtocolName>               = { 0x11B34006, 0xD85B, 0x4D0A, { 0xA2, 0x90, 0xD5, 0xA5, 0x71, 0x31, 0x0E, 0xF7 }}
+
+        [Ppis]
+          <PpiName>gEfiPeiMpServices2PpiGuid</PpiName>      = { 0x5cb9cb3d, 0x31a4, 0x480c, { 0x94, 0x98, 0x29, 0xd2, 0x69, 0xba, 0xcf, 0xba}}
 
         [PcdsFixedAtBuild]
           gEfiMdePkgTokenSpaceGuid.PcdFSBClock|200000000|UINT32|0x0000000c
@@ -64,7 +70,10 @@ public class DecColorSettingsPage implements ColorSettingsPage {
   @Nullable
   @Override
   public Map<String, TextAttributesKey> getAdditionalHighlightingTagToDescriptorMap() {
-    return null;
+    return Map.of(
+        "GuidName", DecSyntaxHighlighter.GUID_NAME,
+        "ProtocolName", DecSyntaxHighlighter.PROTOCOL_NAME,
+        "PpiName", DecSyntaxHighlighter.PPI_NAME);
   }
 
   @Override

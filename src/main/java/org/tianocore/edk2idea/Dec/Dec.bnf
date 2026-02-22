@@ -112,7 +112,10 @@ value ::= (WORD | STRING | HEX_VAL | INT_VAL | BOOL_VAL | DOT | MINUS | SLASH | 
 libraryClassName ::= WORD
 libraryPath ::= path
 
-guidName ::= WORD
+guidName ::= WORD {
+    mixin="org.tianocore.edk2idea.Dec.psi.impl.DecGuidNameMixin"
+    implements="com.intellij.psi.PsiNameIdentifierOwner"
+}
 guidValue ::= LBRACE guidStructure RBRACE
 guidStructure ::= ((HEX_VAL | INT_VAL) COMMA?)+ (LBRACE ((HEX_VAL | INT_VAL) COMMA?)+ RBRACE)?
 

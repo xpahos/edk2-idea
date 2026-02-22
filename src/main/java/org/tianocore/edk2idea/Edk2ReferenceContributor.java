@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.tianocore.edk2idea.Inf.psi.InfPath;
 import org.tianocore.edk2idea.Inf.psi.InfTokenType;
 import com.intellij.psi.tree.IElementType;
+import org.tianocore.edk2idea.Inf.psi.InfGuidName;
 
 public class Edk2ReferenceContributor extends PsiReferenceContributor implements DumbAware {
 
@@ -24,6 +25,9 @@ public class Edk2ReferenceContributor extends PsiReferenceContributor implements
                     @Override
                     public PsiReference @NotNull [] getReferencesByElement(@NotNull PsiElement element,
                             @NotNull ProcessingContext context) {
+                        if (element instanceof org.tianocore.edk2idea.Inf.psi.InfGuidName) {
+                            return new PsiReference[] { new org.tianocore.edk2idea.search.Edk2GuidReference(element) };
+                        }
                         if (element instanceof InfPath ||
                                 element.getNode().getElementType().toString().equals("PATH_STRING")) {
                             return new PsiReference[] {

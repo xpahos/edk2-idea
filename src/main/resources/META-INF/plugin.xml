@@ -103,8 +103,13 @@
                 implementation="org.tianocore.edk2idea.Dec.DecColorSettingsPage"/>
         <colorSettingsPage
                 implementation="org.tianocore.edk2idea.Uni.UniColorSettingsPage"/>
-        
-
+                
+        <annotator
+                language="EDK2 Package Declaration File"
+                implementationClass="org.tianocore.edk2idea.annotator.Edk2GuidAnnotator"/>
+        <annotator
+                language="EDK2 Information Module"
+                implementationClass="org.tianocore.edk2idea.annotator.Edk2GuidAnnotator"/>
 
         <lang.findUsagesProvider
                 language="EDK2 Package Declaration File"
@@ -116,6 +121,8 @@
                 language="EDK2 Information Module"
                 implementationClass="org.tianocore.edk2idea.Inf.InfFindUsagesProvider"/>
         <referencesSearch implementation="org.tianocore.edk2idea.search.Edk2PcdReferenceSearcher"/>
+        <referencesSearch implementation="org.tianocore.edk2idea.search.Edk2GuidReferenceSearcher"/>
         <fileBasedIndex implementation="org.tianocore.edk2idea.index.InfPcdIndex"/>
+        <fileBasedIndex implementation="org.tianocore.edk2idea.index.DecGuidIndex"/>
     </extensions>
 </idea-plugin>

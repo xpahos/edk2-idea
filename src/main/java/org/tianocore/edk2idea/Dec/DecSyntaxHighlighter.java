@@ -26,6 +26,12 @@ public class DecSyntaxHighlighter extends SyntaxHighlighterBase {
             DefaultLanguageHighlighterColors.STRING);
     public static final TextAttributesKey PCD_NAME = createTextAttributesKey("DEC_PCD_NAME",
             DefaultLanguageHighlighterColors.LOCAL_VARIABLE);
+    public static final TextAttributesKey GUID_NAME = createTextAttributesKey("DEC_GUID_NAME",
+            DefaultLanguageHighlighterColors.GLOBAL_VARIABLE);
+    public static final TextAttributesKey PROTOCOL_NAME = createTextAttributesKey("DEC_PROTOCOL_NAME",
+            DefaultLanguageHighlighterColors.GLOBAL_VARIABLE);
+    public static final TextAttributesKey PPI_NAME = createTextAttributesKey("DEC_PPI_NAME",
+            DefaultLanguageHighlighterColors.GLOBAL_VARIABLE);
 
     private static final TextAttributesKey[] COMMENT_KEYS = new TextAttributesKey[] { COMMENT };
     private static final TextAttributesKey[] SECTION_HEADER_KEYS = new TextAttributesKey[] { SECTION_HEADER };
@@ -34,6 +40,9 @@ public class DecSyntaxHighlighter extends SyntaxHighlighterBase {
     private static final TextAttributesKey[] BAD_CHAR_KEYS = new TextAttributesKey[] { BAD_CHARACTER };
     private static final TextAttributesKey[] PATH_STRING_KEYS = new TextAttributesKey[] { PATH_STRING };
     private static final TextAttributesKey[] PCD_NAME_KEYS = new TextAttributesKey[] { PCD_NAME };
+    private static final TextAttributesKey[] GUID_NAME_KEYS = new TextAttributesKey[] { GUID_NAME };
+    private static final TextAttributesKey[] PROTOCOL_NAME_KEYS = new TextAttributesKey[] { PROTOCOL_NAME };
+    private static final TextAttributesKey[] PPI_NAME_KEYS = new TextAttributesKey[] { PPI_NAME };
     private static final TextAttributesKey[] EMPTY_KEYS = new TextAttributesKey[0];
 
     @NotNull

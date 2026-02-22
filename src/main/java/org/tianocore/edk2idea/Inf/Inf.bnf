@@ -125,18 +125,23 @@ libraryClassEntry ::= identifierValue (PIPE featureFlagExpression)?
 // Protocols section
 protocolsSection ::= PROTOCOLS_SECTION_HEADER CRLF (protocolStatement | emptyLineOrComment)*
 protocolStatement ::= protocolEntry CRLF | usageComment CRLF | COMMENT CRLF
-protocolEntry ::= identifierValue (PIPE featureFlagExpression)?
+protocolEntry ::= guidName (PIPE featureFlagExpression)?
 usageComment ::= USAGE
 
 // GUIDs section
 guidsSection ::= GUIDS_SECTION_HEADER CRLF (guidStatement | emptyLineOrComment)*
 guidStatement ::= guidEntry CRLF | usageComment CRLF | COMMENT CRLF
-guidEntry ::= identifierValue (PIPE featureFlagExpression)?
+guidEntry ::= guidName (PIPE featureFlagExpression)?
 
 // PPIs section
 ppisSection ::= PPIS_SECTION_HEADER CRLF (ppiStatement | emptyLineOrComment)*
 ppiStatement ::= ppiEntry CRLF | usageComment CRLF | COMMENT CRLF
-ppiEntry ::= identifierValue (PIPE featureFlagExpression)?
+ppiEntry ::= guidName (PIPE featureFlagExpression)?
+
+guidName ::= IDENTIFIER {
+    mixin="org.tianocore.edk2idea.Inf.psi.impl.InfGuidNameMixin"
+    implements="com.intellij.psi.PsiNameIdentifierOwner"
+}
 
 // PCD sections
 pcdSection ::= PCD_SECTION_HEADER CRLF (pcdStatement | emptyLineOrComment)*

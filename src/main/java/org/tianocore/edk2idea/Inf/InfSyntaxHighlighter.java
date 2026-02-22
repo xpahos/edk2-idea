@@ -26,6 +26,12 @@ public class InfSyntaxHighlighter extends SyntaxHighlighterBase {
             DefaultLanguageHighlighterColors.STRING);
     public static final TextAttributesKey PCD_NAME = createTextAttributesKey("INF_PCD_NAME",
             DefaultLanguageHighlighterColors.LOCAL_VARIABLE);
+    public static final TextAttributesKey GUID_NAME = createTextAttributesKey("INF_GUID_NAME",
+            DefaultLanguageHighlighterColors.GLOBAL_VARIABLE);
+    public static final TextAttributesKey PROTOCOL_NAME = createTextAttributesKey("INF_PROTOCOL_NAME",
+            DefaultLanguageHighlighterColors.GLOBAL_VARIABLE);
+    public static final TextAttributesKey PPI_NAME = createTextAttributesKey("INF_PPI_NAME",
+            DefaultLanguageHighlighterColors.GLOBAL_VARIABLE);
 
     private static final TextAttributesKey[] COMMENT_KEYS = new TextAttributesKey[] { COMMENT };
     private static final TextAttributesKey[] SECTION_HEADER_KEYS = new TextAttributesKey[] { SECTION_HEADER };
@@ -33,6 +39,9 @@ public class InfSyntaxHighlighter extends SyntaxHighlighterBase {
     private static final TextAttributesKey[] DEFINES_VALUE_KEYS = new TextAttributesKey[] { DEFINES_VALUES };
     private static final TextAttributesKey[] PATH_STRING_KEYS = new TextAttributesKey[] { PATH_STRING };
     private static final TextAttributesKey[] PCD_NAME_KEYS = new TextAttributesKey[] { PCD_NAME };
+    private static final TextAttributesKey[] GUID_NAME_KEYS = new TextAttributesKey[] { GUID_NAME };
+    private static final TextAttributesKey[] PROTOCOL_NAME_KEYS = new TextAttributesKey[] { PROTOCOL_NAME };
+    private static final TextAttributesKey[] PPI_NAME_KEYS = new TextAttributesKey[] { PPI_NAME };
     private static final TextAttributesKey[] EMPTY_KEYS = new TextAttributesKey[0];
 
     @NotNull

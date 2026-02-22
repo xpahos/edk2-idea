@@ -20,6 +20,9 @@ final class InfColorSettingsPage implements ColorSettingsPage {
       new AttributesDescriptor("Defines values", InfSyntaxHighlighter.DEFINES_VALUES),
       new AttributesDescriptor("Path string", InfSyntaxHighlighter.PATH_STRING),
       new AttributesDescriptor("PCD variable", InfSyntaxHighlighter.PCD_NAME),
+      new AttributesDescriptor("Guid variable", InfSyntaxHighlighter.GUID_NAME),
+      new AttributesDescriptor("Protocol variable", InfSyntaxHighlighter.PROTOCOL_NAME),
+      new AttributesDescriptor("Ppi variable", InfSyntaxHighlighter.PPI_NAME),
   };
 
   @Override
@@ -79,9 +82,12 @@ final class InfColorSettingsPage implements ColorSettingsPage {
           TpmMeasurementLib
 
         [Protocols]
-          gEfiFirmwareVolume2ProtocolGuid       ## SOMETIMES_CONSUMES
-          gEfiBlockIoProtocolGuid               ## SOMETIMES_CONSUMES
-          gEfiSimpleFileSystemProtocolGuid      ## SOMETIMES_CONSUMES
+          <ProtocolName>gEfiFirmwareVolume2ProtocolGuid</ProtocolName>       ## SOMETIMES_CONSUMES
+          <ProtocolName>gEfiBlockIoProtocolGuid</ProtocolName>               ## SOMETIMES_CONSUMES
+          <ProtocolName>gEfiSimpleFileSystemProtocolGuid</ProtocolName>      ## SOMETIMES_CONSUMES
+
+        [Ppis]
+          <PpiName>gEfiPeiMpServices2PpiGuid</PpiName>
 
         [Guids]
           ## SOMETIMES_CONSUMES   ## Variable:L"DB"
@@ -89,15 +95,15 @@ final class InfColorSettingsPage implements ColorSettingsPage {
           ## SOMETIMES_CONSUMES   ## Variable:L"DBT"
           ## PRODUCES             ## SystemTable
           ## CONSUMES             ## SystemTable
-          gEfiImageSecurityDatabaseGuid
+          <GuidName>gEfiImageSecurityDatabaseGuid</GuidName>
 
           ## SOMETIMES_CONSUMES   ## GUID       # Unique ID for the type of the signature.
           ## SOMETIMES_PRODUCES   ## GUID       # Unique ID for the type of the signature.
-          gEfiCertSha1Guid
+          <GuidName>gEfiCertSha1Guid</GuidName>
 
           ## SOMETIMES_CONSUMES   ## GUID       # Unique ID for the type of the signature.
           ## SOMETIMES_PRODUCES   ## GUID       # Unique ID for the type of the signature.
-          gEfiCertSha256Guid
+          <GuidName>gEfiCertSha256Guid</GuidName>
 
           ## SOMETIMES_CONSUMES   ## GUID       # Unique ID for the type of the signature.
           ## SOMETIMES_PRODUCES   ## GUID       # Unique ID for the type of the signature.
@@ -123,7 +129,10 @@ final class InfColorSettingsPage implements ColorSettingsPage {
   @Nullable
   @Override
   public Map<String, TextAttributesKey> getAdditionalHighlightingTagToDescriptorMap() {
-    return null;
+    return Map.of(
+        "GuidName", InfSyntaxHighlighter.GUID_NAME,
+        "ProtocolName", InfSyntaxHighlighter.PROTOCOL_NAME,
+        "PpiName", InfSyntaxHighlighter.PPI_NAME);
   }
 
   @Override
